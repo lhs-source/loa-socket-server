@@ -24,8 +24,9 @@ db.mongoose
   .connect(db.url, { useNewUrlParser: true, useUnifiedTopology: true }) 
   .then(() => { 
     console.log('db.url', db.url); 
-    console.log('db.mongoose', db.mongoose); 
-    console.log('db.tutorial.db', db.test.db); 
+    // console.log('db.mongoose', db.mongoose); 
+    console.log('db.test.db', db.test.db); 
+    console.log('db.accessary.db', db.accessary.db); 
     console.log('Database Connection Success.'); }) 
   .catch((err : any) => { 
     console.log('Database Connection Failure.', err); 
