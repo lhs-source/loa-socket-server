@@ -1,7 +1,7 @@
 
 
 interface AccessaryFromTradeModel {
-    statue: string;
+    status: string;
 }
 
 export default AccessaryFromTradeModel;
