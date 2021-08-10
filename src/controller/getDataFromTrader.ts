@@ -101,16 +101,16 @@ export async function getData(request: RequestAcc) {
     param['pushKey'] = '';
     param['tooltipData'] = ''; 
     let form = new URLSearchParams(param);
-    console.log('request to trader', form);
+    console.log('request to trader 되네? https://lostark.game.onstove.com/Auction/GetAuctionListV2');
     return axios.post(
-        'https://lhs-yeah.herokuapp.com/https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+        'https://lostark.game.onstove.com/Auction/GetAuctionListV2',
         form, 
         {
             headers: {
                 // 'Content-Type' : 'application/x-www-form-urlencoded'
                 // 'Origin': 'https://lostark.game.onstove.com',
                 // 'Referer': 'https://lostark.game.onstove.com/Auction'
-                "X-Requested-With": "XMLHttpRequest"
+                // "X-Requested-With": "XMLHttpRequest"
             }
         }
     ).then(res => {
