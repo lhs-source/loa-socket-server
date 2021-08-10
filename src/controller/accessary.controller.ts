@@ -1,7 +1,18 @@
 import * as express from 'express';
 
 import AccessaryFromTradeModel from './accessary.interface';
+import { 
+    getData,
+    RequestAcc,
+} from './getDataFromTrader';
 
+
+enum ACCTYPE {
+    ALL = 0,
+    NECK = 200010,
+    EARRING = 200020,
+    RING = 200030,
+}
 
 
 
@@ -19,7 +30,26 @@ class AccessaryController {
     }
 
     getTest = (request: express.Request, response: express.Response) => {
-        response.send('<h3>welcome lhs world</h3>');
+        console.log('getTest start');
+        // response.send('<h3>welcome lhs world</h3>');
+        let param : RequestAcc = {
+            acctype: ACCTYPE.NECK,
+            socket1: {
+                id: 118,
+                name: '원한',
+                number: 5,
+            },
+            socket2: {
+                id: 249,
+                name: '기습의대가',
+                number: 3,
+            },
+            property1: 0,
+            property2: -1,
+        }
+        getData(param).then((res : any) => {
+            response.send(res);
+        })
     }
     /**
      * 거래소에서 원하는 각인의 악세서리를 모두 가져와서
@@ -35,6 +65,7 @@ class AccessaryController {
     putAccessaryFromTrader = (request : express.Request, response : express.Response) => {
         // console.log(request);
         response.send(mockResponse);
+        
     }
 
     /**
@@ -51,11 +82,13 @@ class AccessaryController {
     }
 
 
+
 }
 
 const mockResponse : AccessaryFromTradeModel = {
     status: 'done',
 }
+
 
 export default AccessaryController;
 
