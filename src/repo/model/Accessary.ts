@@ -1,7 +1,7 @@
 
 export default function AccessaryModel (mongoose : any) { 
     // Set model 
-    const Test = mongoose.model(
+    const Accessary = mongoose.model(
         'accessary', 
         mongoose.Schema( {
             grade: Number,
@@ -43,5 +43,5 @@ export default function AccessaryModel (mongoose : any) {
             timestamps: true 
         } ) 
     ); 
-    return Test; 
+    return Accessary; 
 };

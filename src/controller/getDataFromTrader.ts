@@ -101,9 +101,10 @@ export async function getData(request: RequestAcc) {
     param['pushKey'] = '';
     param['tooltipData'] = ''; 
     let form = new URLSearchParams(param);
-    console.log('request to trader', form);
+    // console.log('request to trader');
     return axios.post(
-        'https://lhs-yeah.herokuapp.com/https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+        // 'https://lhs-yeah.herokuapp.com/https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+        'https://lostark.game.onstove.com/Auction/GetAuctionListV2',
         form, 
         {
             headers: {
@@ -114,7 +115,7 @@ export async function getData(request: RequestAcc) {
             }
         }
     ).then(res => {
-        console.log('response from trader');
+        // console.log('response from trader');
         let data = res.data;
         let cheer = cheerio.load(data);
         let output: any[] = [];
@@ -127,13 +128,13 @@ export async function getData(request: RequestAcc) {
             let name = ''
             try {
                 name = (cheer(el).find('span.name')[0].children[0] as any).data;
-            } catch (e : any) {
+            } catch (e ) {
                 // console.log('error debug :: name', cheer(el).find('span.name')[0]);
             }
             let count = '';
             try{
                 count = (cheer(el).find('span.count font')[0].children[0] as any).data.match(/\d/g).join('');
-            }catch(e : any) {
+            }catch(e ) {
                 // console.log('error debug :: count', cheer(el).find('span.count font')[0]);
             }
             let grade = Number(cheer(el).find('div.grade')[0].attribs['data-grade']);
@@ -165,7 +166,7 @@ export async function getData(request: RequestAcc) {
             let price= 0;
             try{
                 price = Number((cheer(el).find('div.price-buy em')[0].children[0] as any).data.match(/\d/g).join(''));
-            } catch(e : any) {
+            } catch(e ) {
                 // console.log('error debug :: price', cheer(el).find('div.price-buy em')[0]);
             }
             let raw: AccData = {
@@ -305,13 +306,13 @@ export async function getDataLegend(request: RequestAcc) {
         let name = ''
         try {
             name = (cheer(el).find('span.name')[0].children[0] as any).data;
-        } catch (e : any) {
+        } catch (e) {
             console.log('error debug :: name', cheer(el).find('span.name')[0]);
         }
         let count = '';
         try{
             count = (cheer(el).find('span.count font')[0].children[0] as any).data.match(/\d/g).join('');
-        }catch(e : any) {
+        }catch(e) {
             console.log('error debug :: count', cheer(el).find('span.count font')[0]);
         }
         let grade = Number(cheer(el).find('div.grade')[0].attribs['data-grade']);
@@ -343,7 +344,7 @@ export async function getDataLegend(request: RequestAcc) {
         let price= 0;
         try{
             price = Number((cheer(el).find('div.price-buy em')[0].children[0] as any).data.match(/\d/g).join(''));
-        } catch(e : any) {
+        } catch(e) {
             console.log('error debug :: price', cheer(el).find('div.price-buy em')[0]);
         }
         let raw: AccData = {
