@@ -9,6 +9,9 @@ import {
 
 import {Socket} from '../constants/SocketList';
 
+import db from '../repo/index';
+import { val } from 'cheerio/lib/api/attributes';
+
 
 enum ACCTYPE {
     ALL = 0,
@@ -100,6 +103,7 @@ class AccessaryController {
                 // 3, 5 / 3, 4 등등 악세서리를 다 조회해온다.
                 valueComposition.forEach((valcomp : number[]) => {
                     // 치 특 신 3번
+                    let propertyPromiseArray = [];
                     for(let k = 0; k < 3; ++k) {
                         let param : RequestAcc = {
                             acctype: ACCTYPE.NECK,
@@ -118,15 +122,27 @@ class AccessaryController {
                         }
                         // console.log(param);
                         if(requestBody.grade === 4) {
-                            promiseArray.push(getDataLegend(param).then((res : any) => {
+                            let dataPromise = getDataLegend(param).then((res : any) => {
                                 console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!`);
-                            }));
+                            });
+                            promiseArray.push(dataPromise);
+                            propertyPromiseArray.push(dataPromise);
                         } else if(requestBody.grade === 5) {
-                            promiseArray.push(getData(param).then((res : any) => {
+                            let dataPromise = getData(param).then((res : any) => {
                                 console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!`);
-                            }));
+                            });
+                            promiseArray.push(dataPromise);
+                            propertyPromiseArray.push(dataPromise);
                         }
                     }
+                    Promise.all(propertyPromiseArray).then((res: any) => {
+                        console.log('치특신 합쳐서 ㅎㅎ', res.length ? res.length : '');
+                        let totalList = [];
+                        for(let list of res){
+                            totalList.push(...list);
+                        }
+                        this.saveToDB(socket1, socket2, requestBody.grade, totalList);
+                    })
                     
                 })
             }
@@ -152,6 +168,30 @@ class AccessaryController {
     }
 
 
+    saveToDB(firstSocket: Socket, secondSocket: Socket, grade: number, itemList: any[]) {
+        // 우선 항목이 있는지 찾기
+        db.accessary.find({}).then((acc : any) => {
+            console.log(acc);
+            if(!acc || acc.length <= 0) {
+                // 항목이 없으면 새로 만들기
+                let item = {
+                    grade: grade,
+                    socket1: firstSocket,
+                    socket2: secondSocket,
+                    itemtrail: [
+                        {
+                            timestamp: new Date(),
+                            list: itemList,
+                        }
+                    ]
+                }
+                let dbAccessary = new db.accessary(item);
+                dbAccessary.save().then(() => {
+                    console.log('save done?!');
+                })
+            }
+        })
+    }
 
 }
 

@@ -7,7 +7,7 @@ mongoose.Promise = global.Promise;
 
 const db = {
     mongoose: mongoose,
-    url: 'mongodb://localhost:27017/?gssapiServiceName=mongodb&authSource=admin',
+    url: 'mongodb://localhost:27017/Lostark?gssapiServiceName=mongodb&authSource=admin',
     test: TestModel(mongoose),
     accessary: AccessaryModel(mongoose),
 };
