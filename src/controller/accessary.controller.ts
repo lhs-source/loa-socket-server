@@ -144,12 +144,14 @@ class AccessaryController {
                         if(requestBody.grade === 4) {
                             let dataPromise = getDataLegend(param).then((res : any) => {
                                 console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!`);
+                                return res;
                             });
                             promiseArray.push(dataPromise);
                             propertyPromiseArray.push(dataPromise);
                         } else if(requestBody.grade === 5) {
                             let dataPromise = getData(param).then((res : any) => {
                                 console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!`);
+                                return res;
                             });
                             promiseArray.push(dataPromise);
                             propertyPromiseArray.push(dataPromise);
@@ -159,9 +161,11 @@ class AccessaryController {
                         console.log('치특신 합쳐서 ㅎㅎ', res.length ? res.length : '');
                         let totalList = [];
                         for(let list of res){
+                            // console.log('치특신 아이템 목록', list);
                             totalList.push(...list);
                         }
-                        this.saveToDB(socket1, socket2, requestBody.grade, totalList);
+                        // console.log('totalList', totalList)
+                        this.saveToDB({...socket1, number: valcomp[0]}, {...socket2, number: valcomp[1]}, requestBody.grade, totalList);
                     })
                     
                 })
@@ -198,8 +202,14 @@ class AccessaryController {
 
     saveToDB(firstSocket: Socket, secondSocket: Socket, grade: number, itemList: any[]) {
         // 우선 항목이 있는지 찾기
-        db.accessary.find({}).then((acc : any) => {
-            console.log(acc);
+        db.accessary.findOne({
+            grade: grade,
+            'socket1.id': firstSocket.id,
+            'socket1.number': firstSocket.number,
+            'socket2.id': secondSocket.id,
+            'socket2.number': secondSocket.number,
+        }).then((acc : any) => {
+            // console.log(acc);
             if(!acc || acc.length <= 0) {
                 // 항목이 없으면 새로 만들기
                 let item = {
@@ -215,8 +225,31 @@ class AccessaryController {
                 }
                 let dbAccessary = new db.accessary(item);
                 dbAccessary.save().then(() => {
-                    console.log('save done?!');
+                    console.log('save new done?!');
                 })
+            }
+            else {
+                console.log('데이터 추가', itemList.length);
+                // 항목이 있으면 list 에 추가
+                let itemTrail = {
+                    timestamp: new Date(),
+                    list: itemList,
+                }
+                // acc.itemtrail.push(itemTrail);
+                db.accessary.updateOne(
+                    { _id: acc._id },
+                    { $push: { itemtrail : 
+                        {   $each: [itemTrail],
+                            $position: 0, }
+                    } },
+                    function (error: any, success: any) {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(success);
+                        }
+                    }
+                )
             }
         })
     }
