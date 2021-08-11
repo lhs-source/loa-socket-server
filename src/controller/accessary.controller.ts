@@ -10,7 +10,10 @@ import {
 import {Socket} from '../constants/SocketList';
 
 import db from '../repo/index';
-import { val } from 'cheerio/lib/api/attributes';
+import { 
+    getDesposition ,
+    getDespComposition
+} from './calculateComposition';
 
 
 enum ACCTYPE {
@@ -37,25 +40,42 @@ class AccessaryController {
 
     getTest = (request: express.Request, response: express.Response) => {
         console.log('getTest start',);
-        // response.send('<h3>welcome lhs world</h3>');
-        let param : RequestAcc = {
-            acctype: ACCTYPE.NECK,
-            socket1: {
-                id: 118,
-                name: '원한',
-                number: 5,
-            },
-            socket2: {
-                id: 249,
-                name: '기습의대가',
-                number: 3,
-            },
-            property1: 0,
-            property2: -1,
-        }
-        getData(param).then((res : any) => {
-            response.send(res);
+        /**
+         * request = {
+         *  grade: number;
+         *  socket: Socket[];
+         *  needNumber: number[];
+         * }
+         * ? socket 과 needNumber 는 길이가 같아야지!
+         */
+        let grade = 5;
+        const accCount = 5;
+        let mockNeedNumber = [8, 8, 6, 15, 3];
+        let mockSumSocket = 40;
+        let ableNumber = grade === 4 ? 
+        // [
+        //     [1, 3],
+        //     [2, 2],
+        //     [2, 3],
+        //     [3, 3],
+        // ] 
+        // :
+        // [
+        //     [3, 4],
+        //     [3, 5],
+        // ]
+        [ 0, 1, 2, 3 ] : [ 3, 4, 5 ];
+
+        let despResult: any[] = [];
+        mockNeedNumber.forEach(val => {
+            despResult.push(getDesposition(val, accCount, ableNumber));
         })
+
+        console.log('getDesposition', despResult);  
+        
+        let deComp = getDespComposition(despResult, mockSumSocket, grade, accCount);
+        console.log('getDespComposition', deComp);
+        response.send(deComp);
     }
     /**
      * 거래소에서 원하는 각인의 악세서리를 모두 가져와서
@@ -163,8 +183,16 @@ class AccessaryController {
      * @param response 조합 결과 배열
      */
     postAccessaryFromTrader = (request : express.Request, response :express.Response) => {
+        /**
+         * request = {
+         *  socket: Socket[],
+         *  needNumber: number[],
+         * }
+         * ? socket 과 needNumber 는 길이가 같아야지!
+         */
+        let mockNeedNumber = [8, 8, 6, 15, 3];
 
-        response.send(mockResponse);        
+
     }
 
 
