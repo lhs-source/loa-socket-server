@@ -67,7 +67,7 @@ export function getDesposition(
         ]
   @param {number} socketSum 소켓 합 ex) 40
  */
-  export function getDespComposition(desposition: any[], socketSum: number, grade: number, accCount: number) {
+export function getDespComposition(desposition: any[], socketSum: number, grade: number, accCount: number) {
   
   let composition: any[] = [];
   let ableComp: any[] = [];
@@ -179,46 +179,49 @@ export function getAllCases(socketList: any[], list: any[], grade: number, accCo
     })
   }
   let finalOutput: any[] = [];
-  let itemDictionary: ItemDictionary[] = spreadSocketComposition(socketList, grade, [ [3,3], [3,4], [3,5], [4,3], [5,3] ])
-  // console.log('itemDictionary', itemDictionary)
-  let createAcc = (sourceList: any[], index: number, targetList: any[], result: any[]) => {
-    let rowOutput: any[] = [];
-    // row 리스트 획득
-    rowRecursive(sourceList, 0, [], rowOutput)
-    
-    // console.log('index : ', index, ' sourceList [', sourceList.join('],['), '] targetList', targetList.join(' '));
-    // console.log('rowOutput : ', rowOutput.join('\n'));
+  let itemDictionary: Promise<ItemDictionary[]> = spreadSocketComposition(socketList, grade, [ [3,3], [3,4], [3,5], [4,3], [5,3] ])
+  return itemDictionary.then((dic: ItemDictionary[]) => {
+    // console.log('itemDictionary', itemDictionary)
+    let createAcc = (sourceList: any[], index: number, targetList: any[], result: any[]) => {
+      let rowOutput: any[] = [];
+      // row 리스트 획득
+      rowRecursive(sourceList, 0, [], rowOutput)
+      
+      // console.log('index : ', index, ' sourceList [', sourceList.join('],['), '] targetList', targetList.join(' '));
+      // console.log('rowOutput : ', rowOutput.join('\n'));
 
-    rowOutput.forEach((val: any[]) => {
-      // 마지막 악세서리일 때
-      if(index === 4) {
-        let items = [...targetList, val];
-        // console.log('last', index, '=>', items.join(' - '));
-        let itemList = findSocket(socketList, items);
-        finalOutput.push({
-          accSocketList: itemList,
-          // accStr: items.map((item, index) => this.getAcc(index, item)),
-          accList: getAcc2(itemDictionary, itemList, grade),//items.map((item, index) => this.getAcc(index, item)),
-          accCompositions: [], // this.getFinalComposition(items), TODO 다른 함수에서 한번에 ㄱㄱ
-        });
-        return;
-      }
-      // 리스트에서 제거한 새로운 리스트 생성
-      let newSourceList = JSON.parse(JSON.stringify(sourceList));
-      for(let i = 0; i < val.length; ++i){
-        if(val[i] > 0){
-          // skip 이 아니면 newSourceList 에서 숫자를 하나 뺀다.
-          newSourceList[i].splice(newSourceList[i].findIndex((src : number) => src === val[i]), 1)
+      rowOutput.forEach((val: any[]) => {
+        // 마지막 악세서리일 때
+        if(index === 4) {
+          let items = [...targetList, val];
+          // console.log('last', index, '=>', items.join(' - '));
+          let itemList = findSocket(socketList, items);
+          finalOutput.push({
+            accSocketList: itemList,
+            // accStr: items.map((item, index) => this.getAcc(index, item)),
+            accList: getAcc2(dic, itemList, grade),//items.map((item, index) => this.getAcc(index, item)),
+            accCompositions: [], // this.getFinalComposition(items), TODO 다른 함수에서 한번에 ㄱㄱ
+          });
+          return;
         }
-      }
-      // 리스트에서 제거한 후 다음 depth 순환
-      createAcc(newSourceList, index + 1, [...targetList, val], result);
-    })
-    return rowOutput;
-  }
-  createAcc(list, 0, [], finalOutput);
-  // console.log('final', finalOutput);
-  return finalOutput;
+        // 리스트에서 제거한 새로운 리스트 생성
+        let newSourceList = JSON.parse(JSON.stringify(sourceList));
+        for(let i = 0; i < val.length; ++i){
+          if(val[i] > 0){
+            // skip 이 아니면 newSourceList 에서 숫자를 하나 뺀다.
+            newSourceList[i].splice(newSourceList[i].findIndex((src : number) => src === val[i]), 1)
+          }
+        }
+        // 리스트에서 제거한 후 다음 depth 순환
+        createAcc(newSourceList, index + 1, [...targetList, val], result);
+      })
+      return rowOutput;
+    }
+    createAcc(list, 0, [], finalOutput);
+    // console.log('final', finalOutput);
+    return finalOutput;
+  })
+  
 }
 
 
@@ -265,6 +268,179 @@ function getAcc2(itemDictionary: ItemDictionary[], sockets: any[], grade: number
   return itemList;
 }
 
+export function getFinalComposition( maxPrice: number, props: any, penalty: any, itemList: any[]) {
+  // 장신구 목록
+  interface SumDataModel {
+    price: number;
+    sockets: any;
+    penalty: any;
+    property: any;
+    propertySum: number;
+  }
+  let tooMuchData = false;
+  let dataLimit = 3000;
+
+  // console.log('getFinalComposition', itemList.length);
+  // console.log('getFinalComposition', itemList[0]);
+  
+  // console.log(allItemList);
+  let allOfFinal: any[] = [];   
+  let propSum = Number(props['[치명]']) + Number(props['[특화]']) + Number(props['[신속]']); 
+  let recursive = (sourceList: any[], depth: number, makeList: AccData[], sumData: SumDataModel) => {
+    let listUp: any = sourceList[depth];
+    // console.log(sourceList, depth, listUp.list);
+    if(tooMuchData === true) {
+      return;
+    }
+    listUp.forEach((item : AccData) => {
+      if(tooMuchData === true) {
+        return;
+      }
+      // 아이템 이름이 같으면 안된다 ㅠ
+      if(makeList.length > 0 && makeList[makeList.length - 1].name === item.name) {
+        return;
+      }
+
+      // 악세 종류 하나의 list 중 아이템 하나임!
+      // 특성을 모두 합쳐서 sum 에 담기
+      if(!item.price || item.price < 0) {
+        return;
+      }
+      let perSumData: SumDataModel = {
+        price: sumData.price + item.price,
+        sockets: {...sumData.sockets},
+        penalty: {...sumData.penalty}, 
+        property: {...sumData.property},
+        propertySum: sumData.propertySum,
+      }
+      if(!perSumData.price || perSumData.price > maxPrice) {
+        return;
+      }
+      // 소켓
+      let socket1 = perSumData.sockets[item.socket1.name];
+      if(socket1){
+        perSumData.sockets[item.socket1.name] += item.socket1.number;
+      }else {
+        perSumData.sockets[item.socket1.name] = item.socket1.number;
+      }
+      
+      let socket2 = perSumData.sockets[item.socket2.name];
+      if(socket2){
+        perSumData.sockets[item.socket2.name] += item.socket2.number;
+      }else {
+        perSumData.sockets[item.socket2.name] = item.socket2.number;
+      }
+      // console.log(perSumData.sockets, perSumData.sockets[item.socket1.name], item.socket1.number, perSumData.sockets[item.socket2.name], item.socket2.number)
+
+      // 패널티
+      let penalty = perSumData.penalty[item.badSocket1.name];
+      if(penalty){
+        perSumData.penalty[item.badSocket1.name] += item.badSocket1.number;
+      }else {
+        perSumData.penalty[item.badSocket1.name] = item.badSocket1.number;
+      }
+      
+      // console.log(perSumData.penalty)
+      let stop = false;
+      for(let key of Object.keys(perSumData.penalty)){
+        if(perSumData.penalty[key] > 4) {
+          stop = true;
+          break;
+        }
+      }
+      if(stop === true) {
+        return;
+      }
+      
+      // 특성
+      let prop1 = perSumData.property[item.property1.name];
+      if(prop1){
+        perSumData.property[item.property1.name] += item.property1.number;
+      }else {
+        perSumData.property[item.property1.name] = item.property1.number;
+      }
+      
+      let prop2 = perSumData.property[item.property2.name];
+      if(prop2){
+        perSumData.property[item.property2.name] += item.property2.number;
+      }else {
+        perSumData.property[item.property2.name] = item.property2.number;
+      }
+
+      if(perSumData.property['[신속]'] 
+        && perSumData.property['[신속]'] > Number(props['[신속]']) + 100) {
+        return;
+      }
+      if(perSumData.property['[치명]'] 
+        && perSumData.property['[치명]'] > Number(props['[치명]']) + 100) {
+        return;
+      }
+      if(perSumData.property['[특화]'] 
+        && perSumData.property['[특화]'] > Number(props['[특화]']) + 100) {
+        return;
+      }
+      
+      // stop = false;
+      // for(let key of Object.keys(perSumData.property)){
+      //   if(perSumData.property[key] > 1200) {
+      //     stop = true;
+      //     break;
+      //   }
+      // }
+      // if(stop === true) {
+      //   return;
+      // }
+
+      let newMakeList = [...makeList, item];
+      if(depth + 1 >= 5) {
+        // console.log(newMakeList, perSumData);
+        if(perSumData.price > maxPrice) {
+          // 가격이 넘으면 안되고
+          return;
+        }
+        let itemPropSum = perSumData.property['[신속]'] ? perSumData.property['[신속]'] : 0
+                         + perSumData.property['[특화]'] ? perSumData.property['[특화]'] : 0
+                         + perSumData.property['[치명]'] ? perSumData.property['[치명]'] : 0;
+        if(propSum > itemPropSum){
+          // 특성 합이 부족하면 탈락
+          // return;
+        }
+
+        // 개별 특성 합이 너무 부족해도 탈락 
+        if(perSumData.property['[신속]'] 
+          && perSumData.property['[신속]'] < Number(props['[신속]'])) {
+          return;
+        }
+        if(perSumData.property['[치명]'] 
+          && perSumData.property['[치명]'] < Number(props['[치명]'])) {
+          return;
+        }
+        if(perSumData.property['[특화]'] 
+          && perSumData.property['[특화]'] < Number(props['[특화]'])) {
+          return;
+        }
+        perSumData.propertySum = ((perSumData.property['[특화]'] ? perSumData.property['[특화]'] : 0)
+                                + (perSumData.property['[신속]'] ? perSumData.property['[신속]'] : 0)
+                                + (perSumData.property['[치명]'] ? perSumData.property['[치명]'] : 0));
+
+        allOfFinal.push([newMakeList, perSumData]);
+        if(allOfFinal.length > dataLimit + 2) {
+          tooMuchData = true;
+        }
+        // this.testAllData.push([newMakeList, perSumData]);
+        return;
+      } 
+
+      recursive(sourceList, depth + 1, newMakeList, perSumData);
+    });
+  }
+  let prePenalty: any = {};
+  prePenalty[penalty.name] = Number(penalty.number);
+  recursive(itemList, 0, [], {price: 0, sockets: {}, penalty: prePenalty, property: {}, propertySum: 0,});
+  // console.log('end of getFinalComposition');
+  return allOfFinal;
+}
+
 
 enum ACCTYPE {
   ALL = 0,
@@ -273,26 +449,36 @@ enum ACCTYPE {
   RING = 200030,
 }
 
-function getDataFromDB(firstSocket: Socket, secondSocket: Socket, accType: ACCTYPE, grade: number, itemList: any[]) {
-  // 우선 항목이 있는지 찾기
+function getDataFromDB(firstSocket: Socket, secondSocket: Socket, propertyType: number, accType: number, grade: number, itemList: any[]) {
   const today = moment()
+  // console.log('getDataFromDB', {
+  //   grade: grade,
+  //   accType: accType,
+  //   propertyType: propertyType,
+  //   'socket1.id': firstSocket.id,
+  //   'socket1.number': firstSocket.number,
+  //   'socket2.id': secondSocket.id,
+  //   'socket2.number': secondSocket.number, 
+  //   timestamp: {
+  //       $gte: today.clone().add(-30, 'minute').toDate(),
+  //       $lte: moment().toDate()
+  //   }
+  // })
   return db.accessary.findOne({
     grade: grade,
     accType: accType,
+    propertyType: propertyType,
     'socket1.id': firstSocket.id,
     'socket1.number': firstSocket.number,
     'socket2.id': secondSocket.id,
     'socket2.number': secondSocket.number, 
-    'itemtrail.timestamp': {
-        $gte: today.clone().add(-5, 'minute').toDate(),
+    timestamp: {
+        $gte: today.clone().add(-30, 'minute').toDate(),
         $lte: moment().toDate()
     }
   },
-  {
-    itemtrail: { $slice: 1 },
-  }
   ).then((res : any) => {
-    console.log('데이터 가져옴?', res);
+    // console.log('데이터 가져옴?', res);
     return res;
   });
 }
@@ -322,11 +508,12 @@ function countThree(list: any[]) : number {
  * @param grade 전설, 유물 등
  * @param valueList 각인 수치 조합 등
  */
-function spreadSocketComposition(socketList: any[], grade: number, valueList: any[], ) : ItemDictionary[] {
+function spreadSocketComposition(socketList: any[], grade: number, valueList: any[], ) : Promise<ItemDictionary[]> {
   let socketLength = socketList.length;
   let itemTypeList: ItemDictionary[] = [];
+  let promiseList: any[] = [];
   for(let i = 0; i < socketLength; ++i){
-    for(let j = i; j < socketLength; ++j){
+    for(let j = i + 1; j < socketLength; ++j){
       
       for(let value of valueList) {
         // [3, 3], [3, 4] 등 악세 수치 조합
@@ -347,40 +534,108 @@ function spreadSocketComposition(socketList: any[], grade: number, valueList: an
         }
         
         // db에서 데이터 가져오기
-        getDataFromDB(socketList[i], socketList[j], ACCTYPE.NECK, grade, []).then((res: any) => {
-          if(!res || res.itemtrail.length <= 0){
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 0, ACCTYPE.NECK, grade, []).then((res: any) => {
+          if(!res){
             console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
             return;
           } else {
             console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
+            itemType.necklessList = itemType.necklessList.concat(res.list);
+            return;
           }
-          itemType.necklessList = res.itemtrail[0].list;
-        });
-        getDataFromDB(socketList[i], socketList[j], ACCTYPE.EARRING, grade, []).then((res: any) => {
-          if(!res || res.itemtrail.length <= 0){
+        }));
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 1, ACCTYPE.NECK, grade, []).then((res: any) => {
+          if(!res){
+            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
+            return;
+          } else {
+            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
+            itemType.necklessList = itemType.necklessList.concat(res.list);
+            return;
+          }
+        }));
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 2, ACCTYPE.NECK, grade, []).then((res: any) => {
+          if(!res){
+            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
+            return;
+          } else {
+            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
+            itemType.necklessList = itemType.necklessList.concat(res.list);
+            return;
+          }
+        }));
+        // ------
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 0, ACCTYPE.EARRING, grade, []).then((res: any) => {
+          if(!res){
             console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
             return;
           } else {
             console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
+            itemType.earringList = itemType.earringList.concat(res.list);
+            return;
           }
-          itemType.earringList = res.itemtrail[0].list;
-        });
-        getDataFromDB(socketList[i], socketList[j], ACCTYPE.RING, grade, []).then((res: any) => {
-          if(!res || res.itemtrail.length <= 0){
+        }));
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 1, ACCTYPE.EARRING, grade, []).then((res: any) => {
+          if(!res){
+            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
+            return;
+          } else {
+            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
+            itemType.earringList = itemType.earringList.concat(res.list);
+            return;
+          }
+        }));
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 2, ACCTYPE.EARRING, grade, []).then((res: any) => {
+          if(!res){
+            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
+            return;
+          } else {
+            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
+            itemType.earringList = itemType.earringList.concat(res.list);
+            return;
+          }
+        }));
+        // ------
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 0, ACCTYPE.RING, grade, []).then((res: any) => {
+          if(!res){
             console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
             return;
           } else {
             console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
+            itemType.ringList = itemType.ringList.concat(res.list);
+            return;
           }
-          itemType.ringList = res.itemtrail[0].list;
-        });
+        }));
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 1, ACCTYPE.RING, grade, []).then((res: any) => {
+          if(!res){
+            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
+            return;
+          } else {
+            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
+            itemType.ringList = itemType.ringList.concat(res.list);
+            return;
+          }
+        }));
+        promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 2, ACCTYPE.RING, grade, []).then((res: any) => {
+          if(!res){
+            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
+            return;
+          } else {
+            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
+            itemType.ringList = itemType.ringList.concat(res.list);
+            return;
+          }
+        }));
 
         itemTypeList.push(itemType);
       }
 
     }
   }
-  return itemTypeList;
+  return Promise.all(promiseList).then((res: any) => {
+    console.log('아이템 사전 만들었어요');
+    return itemTypeList;
+  });
 }
 interface ItemDictionary {
   grade: number;

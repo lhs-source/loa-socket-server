@@ -127,7 +127,7 @@ export async function getData(request: RequestAcc) {
         
         let empty = cheer('tbody').children('tr.empty');
         if(empty && empty.length > 0) {
-            console.log('getData data is empty ', request);
+            // console.log('getData data is empty ', request);
             return output;
         }
         cheer('tbody tr').each((i, el) => {
@@ -186,6 +186,7 @@ export async function getData(request: RequestAcc) {
                 property1: property1,
                 property2: property2,
                 price: price,
+                timestamp: new Date(),
             }
             // console.log(raw);
             output.push(raw);
@@ -383,6 +384,7 @@ export async function getDataLegend(request: RequestAcc) {
             property1: property1,
             property2: property2,
             price: price,
+            timestamp: new Date(),
         }
         // console.log(raw);
         output.push(raw);
@@ -428,4 +430,5 @@ export interface AccData {
         number: number;
     }
     price: number;
+    timestamp: Date;
 }
