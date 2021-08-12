@@ -38,6 +38,7 @@ class AccessaryController {
     initializeRoutes() {
         this.router.get(this.path, this.getTest);
         this.router.put(this.path, this.putAccessaryFromTrader);
+        this.router.post(this.path, this.postAccessaryFromTrader);
     }
 
     getTest = (request: express.Request, response: express.Response) => {
@@ -264,14 +265,114 @@ class AccessaryController {
     postAccessaryFromTrader = (request : express.Request, response :express.Response) => {
         /**
          * request = {
-         *  socket: Socket[],
-         *  needNumber: number[],
+         *  grade: number;
+         *  socket: Socket[];
+         *  needNumber: number[];
          * }
          * ? socket 과 needNumber 는 길이가 같아야지!
          */
-        let mockNeedNumber = [8, 8, 6, 15, 3];
+        interface RequestComposition {
+            socketList: Socket[];
+            needNumber: number[];
+            grade: 4 | 5;
+            maxPrice: number;
+            props: any;
+            penalty: {
+                name: string;
+                number: number;
+            }
+            
+        }
+        let requestBody : RequestComposition = request.body;
 
+        const accCount = 5;
+        // let grade = 5;
+        // let mockSocket : Socket[] = [
+        //     {
+        //         id: 118,
+        //         name: '원한',
+        //     },
+        //     {
+        //         id: 141,
+        //         name: '예리한 둔기',
+        //     },
+        //     {
+        //         id: 299, 
+        //         name: '아드레날린',
+        //     },
+        //     {
+        //         id: 254, 
+        //         name: '돌격대장',
+        //     },
+        //     {
+        //         id: 292, 
+        //         name: '오의난무',
+        //     }
+        // ]
+        // let mockNeedNumber = [8, 8, 6, 15, 3];
+        // let mockSumSocket = 40;
+        let grade = requestBody.grade;
+        let socketList = requestBody.socketList;
+        let needNumber = requestBody.needNumber;
+        let sumSocket = needNumber.reduce((sum: number, current: number) => { sum += current; return sum;}, 0);
+        let ableNumber = grade === 4 ? 
+        // [
+        //     [1, 3],
+        //     [2, 2],
+        //     [2, 3],
+        //     [3, 3],
+        // ] 
+        // :
+        // [
+        //     [3, 4],
+        //     [3, 5],
+        // ]
+        [ 0, 1, 2, 3 ] : [ 3, 4, 5 ];
 
+        let despResult: any[] = [];
+        needNumber.forEach(val => {
+            despResult.push(getDesposition(val, accCount, ableNumber));
+        })
+
+        console.log('getDesposition', despResult);  
+        
+        let deComp = getDespComposition(despResult, sumSocket, grade, accCount);
+        console.log('getDespComposition', deComp);
+
+        let casesResult: any[] = [];
+        deComp.forEach(val => {
+            casesResult.push(getAllCases(socketList, val, grade, accCount, 2));
+        })
+        Promise.all(casesResult).then((res : any[]) => {
+            console.log('getAllCases', casesResult.length);
+    
+            let finalResult: any[] = [];
+            // let mockMaxPrice = 50000;
+            // let props = {
+            //     '[치명]' : 50,
+            //     '[특화]' : 430,
+            //     '[신속]' : 1400,
+            // }
+            // let penalty = 
+            //     {
+            //         name: '[공격력 감소]',
+            //         number: 4,
+            //     }
+            let maxPrice = requestBody.maxPrice;
+            let props = requestBody.props;
+            let penalty = requestBody.penalty;
+
+            res.forEach((cases: any[]) => {
+                cases.forEach((oneCase: any) => {
+                    finalResult.push(...getFinalComposition(maxPrice, props, penalty, oneCase.accList));
+                })
+            })
+            console.log('finalResult', finalResult.length);
+    
+            response.send(finalResult);
+        }).catch(() => {
+            response.send('...');
+        })
     }
 
     /**
