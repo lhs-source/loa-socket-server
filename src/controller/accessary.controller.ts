@@ -171,17 +171,18 @@ class AccessaryController {
                                 property1: k,
                                 property2: -1,
                             }
+                            // TODO 목걸이일 때는 특성이 두개가 가야함!
                             // console.log(param);
                             if(requestBody.grade === 4) {
                                 let dataPromise = getDataLegend(param).then((res : any) => {
-                                    console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!`);
+                                    console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함! ${res.length}`);
                                     return res;
                                 });
                                 promiseArray.push(dataPromise);
                                 propertyPromiseArray.push(dataPromise);
                             } else if(requestBody.grade === 5) {
                                 let dataPromise = getData(param).then((res : any) => {
-                                    console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!`);
+                                    console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 조회함!  ${res.length}`);
                                     return res;
                                 });
                                 promiseArray.push(dataPromise);
@@ -238,12 +239,13 @@ class AccessaryController {
     }
 
 
-    saveToDB(firstSocket: Socket, secondSocket: Socket, acctype: ACCTYPE, grade: number, itemList: any[]) {
+    saveToDB(firstSocket: Socket, secondSocket: Socket, acctype: number, grade: number, itemList: any[]) {
         // 우선 항목이 있는지 찾기
         const today = moment()
         // console.log('gte',  today.clone().add(-5, 'minute').toDate())
         // console.log('lte',  moment().toDate())
         // console.log('acctype', acctype)
+        console.log('saveToDB acctype', acctype)
         db.accessary.findOne({
             grade: grade,
             accType: acctype,
@@ -263,7 +265,7 @@ class AccessaryController {
                 // 항목이 없으면 새로 만들기
                 let item = {
                     grade: grade,
-                    acctype: acctype,
+                    accType: acctype,
                     socket1: firstSocket,
                     socket2: secondSocket,
                     itemtrail: [
@@ -283,7 +285,6 @@ class AccessaryController {
                 // if(acc.itemtrail.length > 0) {
                 //     // 이미 항목에 2분 이내 검색한 결과가 있으면, 디비에 저장하지 않음.
                 // }
-                console.log('있는 데이터에 추가', acc.itemtrail.length, itemList.length);
                 // 항목이 있으면 list 에 추가
                 let itemTrail = {
                     timestamp: new Date(),
@@ -298,9 +299,9 @@ class AccessaryController {
                     } },
                     function (error: any, success: any) {
                         if (error) {
-                            console.log(error);
+                            console.log('있는 데이터에 추가 실패 ', error, acc.itemtrail.length, itemList.length);
                         } else {
-                            console.log(success);
+                            console.log('있는 데이터에 추가 성공', success, acc.itemtrail.length, itemList.length);
                         }
                     }
                 )

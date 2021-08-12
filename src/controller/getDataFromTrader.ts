@@ -27,19 +27,24 @@ export async function getData(request: RequestAcc) {
             prop1 = null;
             break;
     }
-    switch(request.property2){
-        case 0: // 치
-            prop2 = 15;
-            break;
-        case 1: // 특
-            prop2 = 16;
-            break;
-        case 2: // 신
-            prop2 = 18;
-            break;
-        default:
-            prop2 = null;
-            break;
+    if(request.acctype === ACCTYPE.NECK) {
+        switch(request.property1){
+            case 0: // 치특
+                prop1 = 15;
+                prop2 = 16;
+                break;
+            case 1: // 치신
+                prop1 = 15;
+                prop2 = 18;
+                break;
+            case 2: // 특신
+                prop1 = 16;
+                prop2 = 18;
+                break;
+            default:
+                prop2 = null;
+                break;
+        }
     }
 
     param['request[firstCategory]'] = 200000;
@@ -122,6 +127,7 @@ export async function getData(request: RequestAcc) {
         
         let empty = cheer('tbody').children('tr.empty');
         if(empty && empty.length > 0) {
+            console.log('getData data is empty ', request);
             return output;
         }
         cheer('tbody tr').each((i, el) => {
@@ -187,24 +193,26 @@ export async function getData(request: RequestAcc) {
     
         return output;
     }).catch((error: any) => {
-        console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다", request);
-        if (error.response) {
-            // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-          }
-          else if (error.request) {
-            // 요청이 이루어 졌으나 응답을 받지 못했습니다.
-            // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
-            // Node.js의 http.ClientRequest 인스턴스입니다.
-            console.log(error.request);
-          }
-          else {
-            // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
-            console.log('Error', error.message);
-          }
-          console.log(error.config);
+        // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request, param);
+        console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request);
+        return [];
+        // if (error.response) {
+        //     // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
+        //     // console.log(error.response.data);
+        //     console.log(error.response.status);
+        //     console.log(error.response.headers);
+        //   }
+        //   else if (error.request) {
+        //     // 요청이 이루어 졌으나 응답을 받지 못했습니다.
+        //     // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
+        //     // Node.js의 http.ClientRequest 인스턴스입니다.
+        //     console.log(error.request);
+        //   }
+        //   else {
+        //     // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
+        //     console.log('Error', error.message);
+        //   }
+        //   console.log(error.config);
     })
 }
 

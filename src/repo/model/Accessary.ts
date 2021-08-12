@@ -5,7 +5,7 @@ export default function AccessaryModel (mongoose : any) {
         'accessary', 
         mongoose.Schema( {
             grade: Number,
-            acctype: Number,
+            accType: Number,
             socket1: {
                 name: String,
                 number: Number,
