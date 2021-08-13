@@ -43,94 +43,7 @@ class AccessaryController {
 
     getTest = (request: express.Request, response: express.Response) => {
         console.log('getTest start',);
-        /**
-         * request = {
-         *  grade: number;
-         *  socket: Socket[];
-         *  needNumber: number[];
-         * }
-         * ? socket 과 needNumber 는 길이가 같아야지!
-         */
-        let grade = 5;
-        const accCount = 5;
-        let mockSocket : Socket[] = [
-            {
-                id: 118,
-                name: '원한',
-            },
-            {
-                id: 141,
-                name: '예리한 둔기',
-            },
-            {
-                id: 299, 
-                name: '아드레날린',
-            },
-            {
-                id: 254, 
-                name: '돌격대장',
-            },
-            {
-                id: 292, 
-                name: '오의난무',
-            }
-        ]
-        let mockNeedNumber = [8, 8, 6, 15, 3];
-        let mockSumSocket = 40;
-        let ableNumber = grade === 4 ? 
-        // [
-        //     [1, 3],
-        //     [2, 2],
-        //     [2, 3],
-        //     [3, 3],
-        // ] 
-        // :
-        // [
-        //     [3, 4],
-        //     [3, 5],
-        // ]
-        [ 0, 1, 2, 3 ] : [ 3, 4, 5 ];
-
-        let despResult: any[] = [];
-        mockNeedNumber.forEach(val => {
-            despResult.push(getDesposition(val, accCount, ableNumber));
-        })
-
-        console.log('getDesposition', despResult);  
-        
-        let deComp = getDespComposition(despResult, mockSumSocket, grade, accCount);
-        console.log('getDespComposition', deComp);
-
-        let casesResult: any[] = [];
-        deComp.forEach(val => {
-            casesResult.push(getAllCases(mockSocket, val, grade, accCount, 2));
-        })
-        Promise.all(casesResult).then((res : any[]) => {
-            console.log('getAllCases', casesResult.length);
-    
-            let finalResult: any[] = [];
-            let mockMaxPrice = 50000;
-            let props = {
-                '[치명]' : 50,
-                '[특화]' : 430,
-                '[신속]' : 1400,
-            }
-            let penalty = 
-                {
-                    name: '[공격력 감소]',
-                    number: 4,
-                }
-            res.forEach((cases: any[]) => {
-                cases.forEach((oneCase: any) => {
-                    finalResult.push(...getFinalComposition(mockMaxPrice, props, penalty, oneCase.accList));
-                })
-            })
-            console.log('finalResult', finalResult.length);
-    
-            response.send(finalResult);
-        }).catch(() => {
-            response.send('...');
-        })
+        response.send('안녕하세요 by 까마귀주먹(카제로스)');
     }
     /**
      * 거래소에서 원하는 각인의 악세서리를 모두 가져와서
@@ -286,51 +199,14 @@ class AccessaryController {
         let requestBody : RequestComposition = request.body;
 
         const accCount = 5;
-        // let grade = 5;
-        // let mockSocket : Socket[] = [
-        //     {
-        //         id: 118,
-        //         name: '원한',
-        //     },
-        //     {
-        //         id: 141,
-        //         name: '예리한 둔기',
-        //     },
-        //     {
-        //         id: 299, 
-        //         name: '아드레날린',
-        //     },
-        //     {
-        //         id: 254, 
-        //         name: '돌격대장',
-        //     },
-        //     {
-        //         id: 292, 
-        //         name: '오의난무',
-        //     }
-        // ]
-        // let mockNeedNumber = [8, 8, 6, 15, 3];
-        // let mockSumSocket = 40;
         let grade = requestBody.grade;
         let socketList = requestBody.socketList;
-        let needNumber = requestBody.needNumber;
+        let needNumber = requestBody.needNumber.slice(0, requestBody.socketList.length);
         let sumSocket = needNumber.reduce((sum: number, current: number) => { sum += current; return sum;}, 0);
-        let ableNumber = grade === 4 ? 
-        // [
-        //     [1, 3],
-        //     [2, 2],
-        //     [2, 3],
-        //     [3, 3],
-        // ] 
-        // :
-        // [
-        //     [3, 4],
-        //     [3, 5],
-        // ]
-        [ 0, 1, 2, 3 ] : [ 3, 4, 5 ];
+        let ableNumber = grade === 4 ? [ 0, 1, 2, 3 ] : [ 3, 4, 5 ];
 
         let despResult: any[] = [];
-        needNumber.forEach(val => {
+        needNumber.forEach((val, index) => {
             despResult.push(getDesposition(val, accCount, ableNumber));
         })
 
@@ -344,32 +220,37 @@ class AccessaryController {
             casesResult.push(getAllCases(socketList, val, grade, accCount, 2));
         })
         Promise.all(casesResult).then((res : any[]) => {
-            console.log('getAllCases', casesResult.length);
-    
+            console.log('getAllCases', res.length);
+            // console.log('cases', res);
             let finalResult: any[] = [];
-            // let mockMaxPrice = 50000;
-            // let props = {
-            //     '[치명]' : 50,
-            //     '[특화]' : 430,
-            //     '[신속]' : 1400,
-            // }
-            // let penalty = 
-            //     {
-            //         name: '[공격력 감소]',
-            //         number: 4,
-            //     }
             let maxPrice = requestBody.maxPrice;
             let props = requestBody.props;
             let penalty = requestBody.penalty;
+            let stop = false;
 
             res.forEach((cases: any[]) => {
                 cases.forEach((oneCase: any) => {
-                    finalResult.push(...getFinalComposition(maxPrice, props, penalty, oneCase.accList));
+                    if(stop === true) {
+                        return;
+                    }
+                    // console.log('accList', oneCase.accSocketList);
+                    // console.log('accList', oneCase.accList);
+                    let result = getFinalComposition(maxPrice, props, penalty, oneCase.accList);
+                    if(typeof(result) === 'number') {
+                        stop = true;
+                    }else {
+                        finalResult.push(...result);
+                    }
                 })
             })
             console.log('finalResult', finalResult.length);
     
-            response.send(finalResult);
+            if(finalResult.length > 3000) {
+                response.send(-finalResult.length);
+            }
+            else {
+                response.send(finalResult);
+            }
         }).catch(() => {
             response.send('...');
         })
@@ -396,8 +277,6 @@ class AccessaryController {
                 $gte: today.clone().add(-3, 'minute').toDate(),
                 $lte: moment().toDate()
             }
-        }, {
-            itemtrail: { $slice: 10 }
         })
     }
 

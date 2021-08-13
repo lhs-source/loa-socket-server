@@ -14,42 +14,42 @@ import db from '../repo/index';
 * @param {number[]} valuelist 합분해 요소 숫자 리스트 ([5, 3])
 */
 export function getDesposition(
-    targetNumber: number = 0, 
-    accCount: number = 5,
-    valuelist: number[]) {
- let output: any[] = [];
- let recurrsive = (
-   remain: number,
-   makeList: number[],
-   depth: number
- ) => {
-   // 장신구 개수 넘어가면 ㄴㄴ
-   if (depth > accCount) {
-     return;
-   }
-   for (let use of valuelist) {
-     // 이전 숫자보다 크면
-     if (makeList && use > makeList[makeList.length - 1]) {
-       continue;
-     }
-     let nextRemain = remain - use;
+  targetNumber: number = 0, 
+  accCount: number = 5,
+  valuelist: number[]) {
+  let output: any[] = [];
+  let recurrsive = (
+    remain: number,
+    makeList: number[],
+    depth: number
+  ) => {
+    // 장신구 개수 넘어가면 ㄴㄴ
+    if (depth > accCount) {
+      return;
+    }
+    for (let use of valuelist) {
+      // 이전 숫자보다 크면
+      if (makeList && use > makeList[makeList.length - 1]) {
+        continue;
+      }
+      let nextRemain = remain - use;
 
-     if (nextRemain > 0) {
-       // 숫자가 부족함
-       recurrsive(
-         nextRemain,
-         [...makeList, use],
-         depth + 1
-       );
-     } else if (nextRemain === 0) {
-       // 숫자가 딱 떨어짐
-       output.push([...makeList, use]);
-     } else {
-       // 숫자가 넘겨버려서 -가 됨
-       continue;
-     }
-   }
-   return;
+      if (nextRemain > 0) {
+        // 숫자가 부족함
+        recurrsive(
+          nextRemain,
+          [...makeList, use],
+          depth + 1
+        );
+      } else if (nextRemain === 0) {
+        // 숫자가 딱 떨어짐
+        output.push([...makeList, use]);
+      } else {
+        // 숫자가 넘겨버려서 -가 됨
+        continue;
+      }
+    }
+    return;
  };
  recurrsive(targetNumber, [], 0);
  return output;
@@ -179,7 +179,8 @@ export function getAllCases(socketList: any[], list: any[], grade: number, accCo
     })
   }
   let finalOutput: any[] = [];
-  let itemDictionary: Promise<ItemDictionary[]> = spreadSocketComposition(socketList, grade, [ [3,3], [3,4], [3,5], [4,3], [5,3] ])
+  let valueList = grade === 4 ? [ [0,2], [0,3], [1,2], [1,3], [2,0], [2,1], [2,2], [2,3], [3,0], [3,1], [3,2], [3,3] ] : [ [3,3], [3,4], [3,5], [4,3], [5,3] ];
+  let itemDictionary: Promise<ItemDictionary[]> = spreadSocketComposition(socketList, grade, valueList);
   return itemDictionary.then((dic: ItemDictionary[]) => {
     // console.log('itemDictionary', itemDictionary)
     let createAcc = (sourceList: any[], index: number, targetList: any[], result: any[]) => {
@@ -277,7 +278,7 @@ export function getFinalComposition( maxPrice: number, props: any, penalty: any,
     property: any;
     propertySum: number;
   }
-  let tooMuchData = false;
+  let tooMuchData: boolean = false;
   let dataLimit = 3000;
 
   // console.log('getFinalComposition', itemList.length);
@@ -425,6 +426,7 @@ export function getFinalComposition( maxPrice: number, props: any, penalty: any,
 
         allOfFinal.push([newMakeList, perSumData]);
         if(allOfFinal.length > dataLimit + 2) {
+          console.log('data too much more');
           tooMuchData = true;
         }
         // this.testAllData.push([newMakeList, perSumData]);
@@ -438,6 +440,9 @@ export function getFinalComposition( maxPrice: number, props: any, penalty: any,
   prePenalty[penalty.name] = Number(penalty.number);
   recursive(itemList, 0, [], {price: 0, sockets: {}, penalty: prePenalty, property: {}, propertySum: 0,});
   // console.log('end of getFinalComposition');
+  if(allOfFinal.length > dataLimit) {
+    return -allOfFinal.length;
+  }
   return allOfFinal;
 }
 
