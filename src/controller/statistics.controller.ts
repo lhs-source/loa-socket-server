@@ -19,13 +19,19 @@ class LogController {
 
     getLogCount = (request: express.Request, response: express.Response) => {
         console.log('getLogCount start');
-        db.logSocket.find({}).sort({count: -1}).then((res: any[]) => {
+        db.logSocket.find({})
+            .sort({count: -1})
+            .limit(300)
+            .then((res: any[]) => {
             response.send(res);
         })
     }
     getLogPrice = (request: express.Request, response: express.Response) => {
         console.log('getLogPrice start');
-        db.logAccComposition.find({}).sort({createdAt: -1}).then((res: any[]) => {
+        db.logAccComposition.find({})
+            .sort({createdAt: -1})
+            .limit(300)
+            .then((res: any[]) => {
             response.send(res);
         })
     }
