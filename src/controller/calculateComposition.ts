@@ -83,8 +83,9 @@ export function getDespComposition(desposition: any[], socketSum: number, grade:
     if(depth >= desposition.length) {
       return;
     }
-    // console.log(desposition[depth].length)
-    if(desposition[depth].length === 0) {
+    // console.log('desposition[depth]', depth, desposition[depth])
+    if(desposition[depth].length === 0 || desposition[depth][0][0] === 0) {
+      console.log('socket is zero')
       recursive(remain, depth + 1, [...makeList, [0]]);
       // return;
     }
@@ -189,7 +190,7 @@ export function getAllCases(socketList: any[], list: any[], grade: number, accCo
       rowRecursive(sourceList, 0, [], rowOutput)
       
       // console.log('index : ', index, ' sourceList [', sourceList.join('],['), '] targetList', targetList.join(' '));
-      // console.log('rowOutput : ', rowOutput.join('\n'));
+      // console.log('rowOutput : ', rowOutput);
 
       rowOutput.forEach((val: any[]) => {
         // 마지막 악세서리일 때

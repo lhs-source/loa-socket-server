@@ -161,7 +161,7 @@ class AccessaryController {
                                     }
                                 } else {
                                     // 최근 데이터가 있으니까 아무것도 안한다.
-                                    console.log("최근 데이터가 있습니다 ^.^v");
+                                    // console.log("최근 데이터가 있습니다 ^.^v");
                                     return 0;
                                 }
                             })
