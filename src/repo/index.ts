@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 import AccessaryModel from './model/Accessary';
 import LogAccComposition from './model/LogAccComposition';
-import LogSocket from './model/logSocket';
+import LogSocket from './model/LogSocket';
 
 mongoose.Promise = global.Promise;
 
