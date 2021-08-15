@@ -17,6 +17,7 @@ import {
     getAllCases,
     getFinalComposition,
 } from './calculateComposition';
+import { val } from 'cheerio/lib/api/attributes';
 
 
 enum ACCTYPE {
@@ -60,10 +61,19 @@ class AccessaryController {
         interface Request {
             grade: 4 | 5;
             socket: Socket[];
+            needNumber: number[];
         }
         let requestBody : Request = request.body;
 
         console.log('putAccessaryFromTrader body', request.body);
+
+        // 각인 목록을 로그에 저장
+        let logSocket = new db.logSocket({
+            socket: requestBody.socket.map((val: Socket, index: number) => 
+                {return {...val, number: requestBody.needNumber[index]}}),
+        })
+        logSocket.save();
+
         // 각인 조합별로 가져오기
         let promiseArray: any[] = [];
         let socketLength = requestBody.socket.length;
@@ -228,8 +238,11 @@ class AccessaryController {
             let penalty = requestBody.penalty;
             let stop = false;
 
-            res.forEach((cases: any[]) => {
-                cases.forEach((oneCase: any) => {
+            res.forEach((cases: any[], caseCount: number) => {
+                if(stop === true) {
+                    return;
+                }
+                cases.forEach((oneCase: any, oneCaseCount: number) => {
                     if(stop === true) {
                         return;
                     }
@@ -237,22 +250,68 @@ class AccessaryController {
                     // console.log('accList', oneCase.accList);
                     let result = getFinalComposition(maxPrice, props, penalty, oneCase.accList);
                     if(typeof(result) === 'number') {
+                        console.log('getFinalComposition stop', `${caseCount}-${oneCaseCount}`, result);
                         stop = true;
                     }else {
+                        console.log('getFinalComposition', `${caseCount}-${oneCaseCount}`, result.length);
                         finalResult.push(...result);
+                        if(finalResult.length > 3000) {
+                            stop = true;
+                        }
                     }
                 })
             })
             console.log('finalResult', finalResult.length);
     
             if(finalResult.length > 3000) {
-                response.send(-finalResult.length);
+                response.send({count: -finalResult.length});
             }
             else {
+                // 가격순으로 정렬
+                finalResult.sort((a: any, b:any) => {
+                    return a[1].price > b[1].price ? 1 : -1;
+                })
+                
+                if(finalResult[0]) {
+                    // 조합 결과 로그 남기기
+                    let scheme: any = {
+                        socket: socketList,
+                        property: [],
+                        price: finalResult[0][1].price,
+                    }
+                    if(requestBody.props['[치명]']){
+                        let prop: any = {
+                            id: 0,
+                            name: '치명',
+                            number: requestBody.props['[치명]'],
+                        }
+                        scheme.property.push(prop);
+                    }
+                    if(requestBody.props['[특화]']){
+                        let prop: any = {
+                            id: 1,
+                            name: '특화',
+                            number: requestBody.props['[특화]'],
+                        }
+                        scheme.property.push(prop);
+                    }
+                    if(requestBody.props['[신속]']){
+                        let prop: any = {
+                            id: 2,
+                            name: '신속',
+                            number: requestBody.props['[신속]'],
+                        }
+                        scheme.property.push(prop);
+                    }
+                    let logAcc = new db.logAccComposition(scheme);
+                    logAcc.save();
+                }
                 response.send(finalResult);
+
             }
-        }).catch(() => {
-            response.send('...');
+        }).catch((e) => {
+            console.log('뭐가 잘못됐나..?', e);
+            response.send([]);
         })
     }
 
