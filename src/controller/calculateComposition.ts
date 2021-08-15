@@ -541,30 +541,30 @@ function spreadSocketComposition(socketList: any[], grade: number, valueList: an
         // db에서 데이터 가져오기
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 0, ACCTYPE.NECK, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
             itemType.necklessList = itemType.necklessList.concat(res.list);
             return;
           }
         }));
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 1, ACCTYPE.NECK, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
             itemType.necklessList = itemType.necklessList.concat(res.list);
             return;
           }
         }));
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 2, ACCTYPE.NECK, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.NECK, grade);
             itemType.necklessList = itemType.necklessList.concat(res.list);
             return;
           }
@@ -572,30 +572,30 @@ function spreadSocketComposition(socketList: any[], grade: number, valueList: an
         // ------
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 0, ACCTYPE.EARRING, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
             itemType.earringList = itemType.earringList.concat(res.list);
             return;
           }
         }));
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 1, ACCTYPE.EARRING, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
             itemType.earringList = itemType.earringList.concat(res.list);
             return;
           }
         }));
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 2, ACCTYPE.EARRING, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.EARRING, grade);
             itemType.earringList = itemType.earringList.concat(res.list);
             return;
           }
@@ -603,30 +603,30 @@ function spreadSocketComposition(socketList: any[], grade: number, valueList: an
         // ------
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 0, ACCTYPE.RING, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
             itemType.ringList = itemType.ringList.concat(res.list);
             return;
           }
         }));
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 1, ACCTYPE.RING, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
             itemType.ringList = itemType.ringList.concat(res.list);
             return;
           }
         }));
         promiseList.push(getDataFromDB(itemType.socket1, itemType.socket2, 2, ACCTYPE.RING, grade, []).then((res: any) => {
           if(!res){
-            console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
+            // console.log("DEBUG :: db에서 가져오기를 실패했습니다", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade, res);
             return;
           } else {
-            console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
+            // console.log("DEBUG :: db에서 가져오기 성공", itemType.socket1, itemType.socket2, ACCTYPE.RING, grade);
             itemType.ringList = itemType.ringList.concat(res.list);
             return;
           }

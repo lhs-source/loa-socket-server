@@ -10,6 +10,7 @@ export default function LogAccCompositionModel (mongoose : any) {
     const LogAccComposition = mongoose.model(
         'logAccComposition', 
         mongoose.Schema( {
+            grade: Number,
             socket: [
                 {
                     name: String,

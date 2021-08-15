@@ -7,6 +7,7 @@ export default function LogSocketModel (mongoose : any) {
     const LogSocket = mongoose.model(
         'logSocket', 
         mongoose.Schema( {
+            grade: Number,
             socket: [
                 {
                     name: String,
@@ -14,6 +15,7 @@ export default function LogSocketModel (mongoose : any) {
                     id: Number,
                 }
             ],
+            count: Number,
         }, { 
             timestamps: true 
         } ) 

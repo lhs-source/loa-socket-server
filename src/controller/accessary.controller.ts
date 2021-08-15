@@ -1,7 +1,6 @@
 import * as express from 'express';
 import moment from 'moment';
 
-import AccessaryFromTradeModel from './accessary.interface';
 import { 
     getData,
     getDataLegend,
@@ -17,7 +16,6 @@ import {
     getAllCases,
     getFinalComposition,
 } from './calculateComposition';
-import { val } from 'cheerio/lib/api/attributes';
 
 
 enum ACCTYPE {
@@ -67,12 +65,15 @@ class AccessaryController {
 
         console.log('putAccessaryFromTrader body', request.body);
 
-        // 각인 목록을 로그에 저장
-        let logSocket = new db.logSocket({
-            socket: requestBody.socket.map((val: Socket, index: number) => 
-                {return {...val, number: requestBody.needNumber[index]}}),
+        this.checkExistCount(requestBody.grade, requestBody.socket).then((res: any) => {
+            if(!res) {
+                // 없으면 새로 만들기
+                this.saveCount(requestBody.grade, requestBody.socket, requestBody.needNumber);
+            } else {
+                // 있으면 카운트 증가
+                this.updateCount(res);
+            }
         })
-        logSocket.save();
 
         // 각인 조합별로 가져오기
         let promiseArray: any[] = [];
@@ -253,7 +254,7 @@ class AccessaryController {
                         console.log('getFinalComposition stop', `${caseCount}-${oneCaseCount}`, result);
                         stop = true;
                     }else {
-                        console.log('getFinalComposition', `${caseCount}-${oneCaseCount}`, result.length);
+                        // console.log('getFinalComposition', `${caseCount}-${oneCaseCount}`, result.length);
                         finalResult.push(...result);
                         if(finalResult.length > 3000) {
                             stop = true;
@@ -275,6 +276,7 @@ class AccessaryController {
                 if(finalResult[0]) {
                     // 조합 결과 로그 남기기
                     let scheme: any = {
+                        grade: grade,
                         socket: socketList,
                         property: [],
                         price: finalResult[0][1].price,
@@ -315,6 +317,46 @@ class AccessaryController {
         })
     }
 
+    checkExistCount(grade: number, socket: Socket[]) {
+        let select = {
+            grade: grade,
+            $and: socket.map((val: Socket) => {
+                return { socket: { $elemMatch: {id: val.id} } };
+            })
+        }
+        // console.log('checkExistCount', select);
+        return db.logSocket.findOne(select).then((res: any) => {
+            console.log(res);
+            return res;
+        });
+    }
+    /**
+     * * 새로 로그를 만든다.
+     */
+    saveCount(grade: number, socket: Socket[], needNumber: number[]) {
+        // 각인 목록을 로그에 저장
+        let logSocket = new db.logSocket({
+            grade: grade,
+            socket: socket.map((val: Socket, index: number) => 
+                {return {...val, number: needNumber[index]}}),
+            count: 1,
+        })
+        logSocket.save().then((res: any) => {
+            console.log('로그 카운트 생성!');
+        })
+    }
+    /**
+     * * 로그의 숫자를 업데이트 한다.
+     */
+    updateCount(res: any) {
+        res.updateOne({
+            count: res.count + 1,
+        }).then(() => {
+            console.log('로그 카운트 업!');
+        })
+    }
+
+
     /**
      * * 디비에 데이터가 있는지 체크한다.
      * @param firstSocket 
@@ -333,7 +375,7 @@ class AccessaryController {
             'socket2.id': secondSocket.id,
             'socket2.number': secondSocket.number, 
             timestamp: {
-                $gte: today.clone().add(-3, 'minute').toDate(),
+                $gte: today.clone().add(-5, 'minute').toDate(),
                 $lte: moment().toDate()
             }
         })
@@ -363,9 +405,6 @@ class AccessaryController {
     }
 }
 
-const mockResponse : AccessaryFromTradeModel = {
-    status: 'done',
-}
 
 
 export default AccessaryController;
