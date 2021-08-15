@@ -132,7 +132,7 @@ class AccessaryController {
                                     // 결과가 없음, 데이터를 새로 가져오자
                                     if(requestBody.grade === 4) {
                                         return getDataLegend(param).then((res : any) => {
-                                            console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 거래소에서 가져옴! ${res.length}`);
+                                            // console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 거래소에서 가져옴! ${res.length}`);
                                             return res;
                                         }).then((itemList: any[]) => {
                                             // 가져온 데이터로 디비에 저장한다.
@@ -146,7 +146,7 @@ class AccessaryController {
                                         });
                                     } else if(requestBody.grade === 5) {
                                         return getData(param).then((res : any) => {
-                                            console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 거래소에서 가져옴!  ${res.length}`);
+                                            // console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 거래소에서 가져옴!  ${res.length}`);
                                             return res;
                                         }).then((itemList: any[]) => {
                                             // 가져온 데이터로 디비에 저장한다.
