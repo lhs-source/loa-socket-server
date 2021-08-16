@@ -105,116 +105,115 @@ export async function getData(request: RequestAcc) {
     param['request[pageNo]'] = 1
     param['pushKey'] = '';
     param['tooltipData'] = ''; 
-    let form = new URLSearchParams(param);
-    // console.log('request to trader');
-    return axios.post(
-        // 'https://lhs-yeah.herokuapp.com/https://lostark.game.onstove.com/Auction/GetAuctionListV2',
-        'https://lostark.game.onstove.com/Auction/GetAuctionListV2',
-        form, 
-        {
-            headers: {
-                // 'Content-Type' : 'application/x-www-form-urlencoded'
-                // 'Origin': 'https://lostark.game.onstove.com',
-                // 'Referer': 'https://lostark.game.onstove.com/Auction'
-                // "X-Requested-With": "XMLHttpRequest"
-            }
-        }
-    ).then(res => {
-        // console.log('response from trader');
-        let data = res.data;
-        let cheer = cheerio.load(data);
-        let output: any[] = [];
-        
-        let empty = cheer('tbody').children('tr.empty');
-        if(empty && empty.length > 0) {
-            // console.log('getData data is empty ', request);
-            return output;
-        }
-        cheer('tbody tr').each((i, el) => {
-            let name = ''
-            try {
-                name = (cheer(el).find('span.name')[0].children[0] as any).data;
-            } catch (e ) {
-                // console.log('error debug :: name', cheer(el).find('span.name')[0]);
-            }
-            let count = '';
-            try{
-                count = (cheer(el).find('span.count font')[0].children[0] as any).data.match(/\d/g).join('');
-            }catch(e ) {
-                // console.log('error debug :: count', cheer(el).find('span.count font')[0]);
-            }
-            let grade = Number(cheer(el).find('div.grade')[0].attribs['data-grade']);
-            let socket = cheer(el).find('div.effect ul')[0];
-            let socket1 = {
-                name: (cheer(socket.children[1]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(socket.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let socket2 = {
-                name: (cheer(socket.children[3]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(socket.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let badSocket1 = {
-                name: (cheer(socket.children[5]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(socket.children[5]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let prop = cheer(el).find('div.effect ul')[1];
-            let property1 = {
-                name: (cheer(prop.children[1]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(prop.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let property2 = {name:'', number: 0};
-            if(request.acctype === ACCTYPE.NECK) {
-                property2 = {
-                    name: (cheer(prop.children[3]).children('font')[0].children[0] as any).data,
-                    number: Number((cheer(prop.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-                };
-            }
-            let price= 0;
-            try{
-                price = Number((cheer(el).find('div.price-buy em')[0].children[0] as any).data.match(/\d/g).join(''));
-            } catch(e ) {
-                // console.log('error debug :: price', cheer(el).find('div.price-buy em')[0]);
-            }
-            let raw: AccData = {
-                name: name,
-                count: count,
-                grade: grade,
-                acctype: request.acctype,
-                socket1: socket1,
-                socket2: socket2,
-                badSocket1: badSocket1,
-                property1: property1,
-                property2: property2,
-                price: price,
-                timestamp: new Date(),
-            }
-            // console.log(raw);
-            output.push(raw);
-        })
-    
-        return output;
-    }).catch((error: any) => {
-        // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request, param);
-        console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request);
-        return [];
-        // if (error.response) {
-        //     // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
-        //     // console.log(error.response.data);
-        //     console.log(error.response.status);
-        //     console.log(error.response.headers);
-        //   }
-        //   else if (error.request) {
-        //     // 요청이 이루어 졌으나 응답을 받지 못했습니다.
-        //     // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
-        //     // Node.js의 http.ClientRequest 인스턴스입니다.
-        //     console.log(error.request);
-        //   }
-        //   else {
-        //     // 오류를 발생시킨 요청을 설정하는 중에 문제가 발생했습니다.
-        //     console.log('Error', error.message);
-        //   }
-        //   console.log(error.config);
-    })
+
+    let promiseAll: any = [];
+    for(let i = 1; i < 6; ++i){
+        param['request[pageNo]'] = i;
+        let form = new URLSearchParams(param);
+        // console.log('여러 페이지 가져옵니다', i);
+        promiseAll.push(
+            axios.post(
+                // 'https://lhs-yeah.herokuapp.com/https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+                'https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+                form, 
+                {
+                    headers: {
+                        // 'Content-Type' : 'application/x-www-form-urlencoded'
+                        // 'Origin': 'https://lostark.game.onstove.com',
+                        // 'Referer': 'https://lostark.game.onstove.com/Auction'
+                        // "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            ).then(res => {
+                // console.log('response from trader');
+                let data = res.data;
+                let cheer = cheerio.load(data);
+                let output: any[] = [];
+                
+                let empty = cheer('tbody').children('tr.empty');
+                if(empty && empty.length > 0) {
+                    // console.log('getData data is empty ', request);
+                    return output;
+                }
+                cheer('tbody tr').each((i, el) => {
+                    let name = ''
+                    try {
+                        name = (cheer(el).find('span.name')[0].children[0] as any).data;
+                    } catch (e ) {
+                        // console.log('error debug :: name', cheer(el).find('span.name')[0]);
+                    }
+                    let count = '';
+                    try{
+                        count = (cheer(el).find('span.count font')[0].children[0] as any).data.match(/\d/g).join('');
+                    }catch(e ) {
+                        // console.log('error debug :: count', cheer(el).find('span.count font')[0]);
+                    }
+                    let grade = Number(cheer(el).find('div.grade')[0].attribs['data-grade']);
+                    let socket = cheer(el).find('div.effect ul')[0];
+                    let socket1 = {
+                        name: (cheer(socket.children[1]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(socket.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let socket2 = {
+                        name: (cheer(socket.children[3]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(socket.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let badSocket1 = {
+                        name: (cheer(socket.children[5]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(socket.children[5]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let prop = cheer(el).find('div.effect ul')[1];
+                    let property1 = {
+                        name: (cheer(prop.children[1]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(prop.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let property2 = {name:'', number: 0};
+                    if(request.acctype === ACCTYPE.NECK) {
+                        property2 = {
+                            name: (cheer(prop.children[3]).children('font')[0].children[0] as any).data,
+                            number: Number((cheer(prop.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                        };
+                    }
+                    let price= 0;
+                    try{
+                        price = Number((cheer(el).find('div.price-buy em')[0].children[0] as any).data.match(/\d/g).join(''));
+                    } catch(e ) {
+                        // console.log('error debug :: price, 무시!', cheer(el).find('div.price-buy em')[0]);
+                        // price 가져오는 데 문제가 있다면 이 녀석은 무시한다.
+                        return;
+                    }
+                    let raw: AccData = {
+                        name: name,
+                        count: count,
+                        grade: grade,
+                        acctype: request.acctype,
+                        socket1: socket1,
+                        socket2: socket2,
+                        badSocket1: badSocket1,
+                        property1: property1,
+                        property2: property2,
+                        price: price,
+                        timestamp: new Date(),
+                    }
+                    // console.log(raw);
+                    output.push(raw);
+                })
+            
+                return output;
+            }).catch((error: any) => {
+                // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request, param);
+                // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", i);
+                return [];
+            })
+        );
+    }
+
+    return Promise.all(promiseAll).then((res: any[]) => {
+        return res.reduce((totalList: any[], current: any[]) => {
+            totalList.push(...current);
+            return totalList;
+        }, []);
+    });
 }
 
 export async function getDataLegend(request: RequestAcc) {
@@ -313,94 +312,116 @@ export async function getDataLegend(request: RequestAcc) {
     param['request[pageNo]'] = 1
     param['pushKey'] = '';
     param['tooltipData'] = ''; 
-    let form = new URLSearchParams(param);
-    return await axios.post(
-        'https://lostark.game.onstove.com/Auction/GetAuctionListV2',
-        form, 
-        {
-            headers: {
-                // 'Content-Type' : 'application/x-www-form-urlencoded'
-                // 'Origin': 'https://lostark.game.onstove.com',
-                // 'Referer': 'https://lostark.game.onstove.com/Auction'
 
-            }
-        }
-    ).then(res => {
-        let data = res.data;
-        let cheer = cheerio.load(data);
-        let output: any[] = [];
-        
-        let empty = cheer('tbody').children('tr.empty');
-        if(empty && empty.length > 0) {
-            return output;
-        }
-        cheer('tbody tr').each((i, el) => {
-            let name = ''
-            try {
-                name = (cheer(el).find('span.name')[0].children[0] as any).data;
-            } catch (e) {
-                // console.log('error debug :: name', cheer(el).find('span.name')[0]);
-            }
-            let count = '';
-            try{
-                count = (cheer(el).find('span.count font')[0].children[0] as any).data.match(/\d/g).join('');
-            }catch(e) {
-                // console.log('error debug :: count', cheer(el).find('span.count font')[0]);
-            }
-            let grade = Number(cheer(el).find('div.grade')[0].attribs['data-grade']);
-            let socket = cheer(el).find('div.effect ul')[0];
-            let socket1 = {
-                name: (cheer(socket.children[1]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(socket.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let socket2 = {
-                name: (cheer(socket.children[3]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(socket.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let badSocket1 = {
-                name: (cheer(socket.children[5]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(socket.children[5]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let prop = cheer(el).find('div.effect ul')[1];
-            let property1 = {
-                name: (cheer(prop.children[1]).children('font')[0].children[0] as any).data,
-                number: Number((cheer(prop.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-            };
-            let property2 = {name:'', number: 0};
-            if(request.acctype === ACCTYPE.NECK) {
-                property2 = {
-                    name: (cheer(prop.children[3]).children('font')[0].children[0] as any).data,
-                    number: Number((cheer(prop.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
-                };
-            }
-            let price= 0;
-            try{
-                price = Number((cheer(el).find('div.price-buy em')[0].children[0] as any).data.match(/\d/g).join(''));
-            } catch(e) {
-                // console.log('error debug :: price', cheer(el).find('div.price-buy em')[0]);
-            }
-            let raw: AccData = {
-                name: name,
-                count: count,
-                grade: grade,
-                acctype: request.acctype,
-                socket1: socket1,
-                socket2: socket2,
-                badSocket1: badSocket1,
-                property1: property1,
-                property2: property2,
-                price: price,
-                timestamp: new Date(),
-            }
-            // console.log(raw);
-            output.push(raw);
-        })
-        return output;
-    }).catch((error: any) => {
-        // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request, param);
-        console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request);
-        return [];
-    })
+    
+    let promiseAll: any = [];
+    for(let i = 1; i < 6; ++i){
+        param['request[pageNo]'] = i;
+        let form = new URLSearchParams(param);
+        // console.log('여러 페이지 가져옵니다', i);
+        promiseAll.push(
+            axios.post(
+                // 'https://lhs-yeah.herokuapp.com/https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+                'https://lostark.game.onstove.com/Auction/GetAuctionListV2',
+                form, 
+                {
+                    headers: {
+                        // 'Content-Type' : 'application/x-www-form-urlencoded'
+                        // 'Origin': 'https://lostark.game.onstove.com',
+                        // 'Referer': 'https://lostark.game.onstove.com/Auction'
+                        // "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            ).then(res => {
+                // console.log('response from trader');
+                let data = res.data;
+                let cheer = cheerio.load(data);
+                let output: any[] = [];
+                
+                let empty = cheer('tbody').children('tr.empty');
+                if(empty && empty.length > 0) {
+                    // console.log('getData data is empty ', request);
+                    return output;
+                }
+                cheer('tbody tr').each((i, el) => {
+                    let name = ''
+                    try {
+                        name = (cheer(el).find('span.name')[0].children[0] as any).data;
+                    } catch (e ) {
+                        // console.log('error debug :: name', cheer(el).find('span.name')[0]);
+                    }
+                    let count = '';
+                    try{
+                        count = (cheer(el).find('span.count font')[0].children[0] as any).data.match(/\d/g).join('');
+                    }catch(e ) {
+                        // console.log('error debug :: count', cheer(el).find('span.count font')[0]);
+                    }
+                    let grade = Number(cheer(el).find('div.grade')[0].attribs['data-grade']);
+                    let socket = cheer(el).find('div.effect ul')[0];
+                    let socket1 = {
+                        name: (cheer(socket.children[1]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(socket.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let socket2 = {
+                        name: (cheer(socket.children[3]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(socket.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let badSocket1 = {
+                        name: (cheer(socket.children[5]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(socket.children[5]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let prop = cheer(el).find('div.effect ul')[1];
+                    let property1 = {
+                        name: (cheer(prop.children[1]).children('font')[0].children[0] as any).data,
+                        number: Number((cheer(prop.children[1]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                    };
+                    let property2 = {name:'', number: 0};
+                    if(request.acctype === ACCTYPE.NECK) {
+                        property2 = {
+                            name: (cheer(prop.children[3]).children('font')[0].children[0] as any).data,
+                            number: Number((cheer(prop.children[3]).children('font')[1].children[0] as any).data.match(/\d/g).join('')),
+                        };
+                    }
+                    let price= 0;
+                    try{
+                        price = Number((cheer(el).find('div.price-buy em')[0].children[0] as any).data.match(/\d/g).join(''));
+                    } catch(e ) {
+                        // console.log('error debug :: price, 무시!', cheer(el).find('div.price-buy em')[0]);
+                        // price 가져오는 데 문제가 있다면 이 녀석은 무시한다.
+                        return;
+                    }
+                    let raw: AccData = {
+                        name: name,
+                        count: count,
+                        grade: grade,
+                        acctype: request.acctype,
+                        socket1: socket1,
+                        socket2: socket2,
+                        badSocket1: badSocket1,
+                        property1: property1,
+                        property2: property2,
+                        price: price,
+                        timestamp: new Date(),
+                    }
+                    // console.log(raw);
+                    output.push(raw);
+                })
+            
+                return output;
+            }).catch((error: any) => {
+                // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", request, param);
+                // console.log("DEBUG :: 거래소에서 데이터 가져오는 데 문제가 생겼다, 아니면 결과가 없음!", i);
+                return [];
+            })
+        );
+    }
+
+    return Promise.all(promiseAll).then((res: any[]) => {
+        return res.reduce((totalList: any[], current: any[]) => {
+            totalList.push(...current);
+            return totalList;
+        }, []);
+    });
 }
 
 
