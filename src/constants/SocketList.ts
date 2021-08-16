@@ -81,7 +81,7 @@ const SocketList: Socket[] = [
     { id: 289, name: '피스메이커', class:'건슬링어'},
     { id: 192, name: '핸드거너', class:'데빌헌터'},
     { id: 130, name: '화력 강화', class:'블래스터'},
-    { id: 294, name: '환류', class:'소서리스'}
+    { id: 294, name: '환류', class:'소서리스'},
     { id: 201, name: '황제의 칙령', class:'아르카나'},
     { id: 200, name: '황후의 은총', class:'아르카나'},
 
