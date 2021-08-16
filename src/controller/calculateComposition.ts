@@ -479,7 +479,7 @@ function getDataFromDB(firstSocket: Socket, secondSocket: Socket, propertyType: 
     'socket2.id': secondSocket.id,
     'socket2.number': secondSocket.number, 
     timestamp: {
-        $gte: today.clone().add(-30, 'minute').toDate(),
+        $gte: today.clone().add(-5, 'minute').toDate(),
         $lte: moment().toDate()
     }
   },
