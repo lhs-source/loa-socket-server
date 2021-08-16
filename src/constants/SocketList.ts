@@ -8,6 +8,8 @@ const SocketList: Socket[] = [
     { id: 299, name: '아드레날린', class:''},
     { id: 254, name: '돌격대장', class:''},
     { id: 255, name: '각성', class:''},
+    { id: 121, name: '슈퍼 차지', class:''},
+    { id: 240, name: '중갑 착용', class:''},
     { id: 286, name: '갈증', class:'리퍼'},
     { id: 243, name: '강령술', class:''},
     { id: 129, name: '강화 무기', class:'데빌헌터'},
@@ -40,7 +42,6 @@ const SocketList: Socket[] = [
     { id: 244, name: '선수필승', class:''},
     { id: 256, name: '세맥타통', class:'기공사'},
     { id: 300, name: '속전속결', class:''},
-    { id: 121, name: '슈퍼 차지', class:''},
     { id: 248, name: '승부사', class:''},
     { id: 298, name: '시선 집중', class:''},
     { id: 237, name: '실드 관통', class:''},
@@ -62,9 +63,9 @@ const SocketList: Socket[] = [
     { id: 195, name: '절실한 구원', class:'바드'},
     { id: 276, name: '절정', class:'창술사'},
     { id: 277, name: '절제', class:'창술사'},
+    { id: 293, name: '점화', class:'점화'},
     { id: 303, name: '정밀 단도', class:''},
     { id: 259, name: '죽음의 습격', class:'호크아이'},
-    { id: 240, name: '중갑 착용', class:''},
     { id: 197, name: '중력 수련', class:'디스트로이어'},
     { id: 194, name: '진실된 용맹', class:'바드'},
     { id: 285, name: '진화의 유산', class:'스카우터'},
@@ -80,6 +81,7 @@ const SocketList: Socket[] = [
     { id: 289, name: '피스메이커', class:'건슬링어'},
     { id: 192, name: '핸드거너', class:'데빌헌터'},
     { id: 130, name: '화력 강화', class:'블래스터'},
+    { id: 294, name: '환류', class:'소서리스'}
     { id: 201, name: '황제의 칙령', class:'아르카나'},
     { id: 200, name: '황후의 은총', class:'아르카나'},
 
@@ -87,10 +89,9 @@ const SocketList: Socket[] = [
 
 
 export interface Socket {
-    id: number;
-    name?: string;
-    class?: string;
-    number?: number;
+        id: number;
+        name: string;
+        class: string;
 }
 
 export default SocketList;
