@@ -375,7 +375,7 @@ class AccessaryController {
             'socket2.id': secondSocket.id,
             'socket2.number': secondSocket.number, 
             timestamp: {
-                $gte: today.clone().add(-5, 'minute').toDate(),
+                $gte: today.clone().add(-2, 'minute').toDate(),
                 $lte: moment().toDate()
             }
         })
