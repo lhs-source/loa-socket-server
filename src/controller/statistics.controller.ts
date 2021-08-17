@@ -15,6 +15,7 @@ class LogController {
     initializeRoutes() {
         this.router.get(`${this.path}`, this.getLogCount);
         this.router.get(`${this.path}/price`, this.getLogPrice);
+        this.router.put(`${this.path}/price`, this.putLogPrice);
     }
 
     getLogCount = (request: express.Request, response: express.Response) => {
@@ -34,6 +35,21 @@ class LogController {
             .then((res: any[]) => {
             response.send(res);
         })
+    }
+    putLogPrice = (request: express.Request, response: express.Response) => {
+        console.log('putLogPrice start');
+        let body = request.body;
+        let scheme: any = {
+            grade: body.grade,
+            socket: body.socket,
+            property: body.property,
+            price: body.price,
+        }
+        console.log('log!', scheme);
+        let logAcc = new db.logAccComposition(scheme);
+        logAcc.save().then((res: any) => {
+            response.send('saved');
+        });
     }
 }
 

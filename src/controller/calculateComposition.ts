@@ -7,6 +7,8 @@ import { AccData } from './getDataFromTrader';
 
 import db from '../repo/index';
 
+const dbCheckTime = -2;
+
 /**
 * * 숫자 합분해를 찾아낸다
 * @param {number} targetNumber 합분해 대상 숫자 (15)
@@ -479,7 +481,7 @@ function getDataFromDB(firstSocket: Socket, secondSocket: Socket, propertyType: 
     'socket2.id': secondSocket.id,
     'socket2.number': secondSocket.number, 
     timestamp: {
-        $gte: today.clone().add(-2, 'minute').toDate(),
+        $gte: today.clone().add(dbCheckTime, 'minute').toDate(),
         $lte: moment().toDate()
     }
   },

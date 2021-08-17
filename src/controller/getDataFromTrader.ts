@@ -9,6 +9,8 @@ enum ACCTYPE {
     RING = 200030,
 }
 
+const loopCount = 4; // 1, 2, 3
+
 export async function getData(request: RequestAcc) {
     let param: any = {};
     let prop1: number | null = 0;
@@ -107,7 +109,7 @@ export async function getData(request: RequestAcc) {
     param['tooltipData'] = ''; 
 
     let promiseAll: any = [];
-    for(let i = 1; i < 6; ++i){
+    for(let i = 1; i < loopCount; ++i){
         param['request[pageNo]'] = i;
         let form = new URLSearchParams(param);
         // console.log('여러 페이지 가져옵니다', i);
@@ -315,7 +317,7 @@ export async function getDataLegend(request: RequestAcc) {
 
     
     let promiseAll: any = [];
-    for(let i = 1; i < 6; ++i){
+    for(let i = 1; i < loopCount; ++i){
         param['request[pageNo]'] = i;
         let form = new URLSearchParams(param);
         // console.log('여러 페이지 가져옵니다', i);

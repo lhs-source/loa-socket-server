@@ -25,6 +25,7 @@ enum ACCTYPE {
 }
 
 
+const dbCheckTime = -1;
 
 class AccessaryController {
     public path = '/acc'
@@ -398,7 +399,7 @@ class AccessaryController {
             'socket2.id': secondSocket.id,
             'socket2.number': secondSocket.number, 
             timestamp: {
-                $gte: today.clone().add(-1, 'minute').toDate(),
+                $gte: today.clone().add(dbCheckTime, 'minute').toDate(),
                 $lte: moment().toDate()
             }
         })
