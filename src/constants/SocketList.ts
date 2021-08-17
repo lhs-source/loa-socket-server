@@ -90,8 +90,9 @@ const SocketList: Socket[] = [
 
 export interface Socket {
         id: number;
-        name: string;
-        class: string;
+        name?: string;
+        class?: string;
+        number?: number;
 }
 
 export default SocketList;

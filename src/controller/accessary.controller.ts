@@ -129,10 +129,12 @@ class AccessaryController {
                                 requestBody.grade)
                             .then((result: any) => {
                                 if(!result) {
+                                    console.log(`디비에 데이터가 없다 ㅠ ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
                                     // 결과가 없음, 데이터를 새로 가져오자
                                     if(requestBody.grade === 4) {
                                         return getDataLegend(param).then((res : any) => {
                                             // console.log(`전설 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 거래소에서 가져옴! ${res.length}`);
+                                            // console.log(res);
                                             return res;
                                         }).then((itemList: any[]) => {
                                             // 가져온 데이터로 디비에 저장한다.
@@ -142,11 +144,16 @@ class AccessaryController {
                                                 k, 
                                                 Number(accType),
                                                 requestBody.grade, 
-                                                itemList);
+                                                itemList).then((dbres: any) => {
+                                                    console.log(`디비 저장 성공! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
+                                                }).catch((dberr: any) => {
+                                                    console.log(`디비 저장 에러! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`, dberr);
+                                                })
                                         });
                                     } else if(requestBody.grade === 5) {
                                         return getData(param).then((res : any) => {
                                             // console.log(`유물 ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} 거래소에서 가져옴!  ${res.length}`);
+                                            // console.log(res);
                                             return res;
                                         }).then((itemList: any[]) => {
                                             // 가져온 데이터로 디비에 저장한다.
@@ -156,14 +163,21 @@ class AccessaryController {
                                                 k, 
                                                 Number(accType),
                                                 requestBody.grade, 
-                                                itemList);
+                                                itemList).then((dbres: any) => {
+                                                    console.log(`디비 저장 성공! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
+                                                }).catch((dberr: any) => {
+                                                    console.log(`디비 저장 에러! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`, dberr);
+                                                })
                                         });
                                     }
+                                    return 0;
                                 } else {
                                     // 최근 데이터가 있으니까 아무것도 안한다.
-                                    // console.log("최근 데이터가 있습니다 ^.^v");
+                                    console.log(`최근 데이터가 있습니다 ^.^v ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
                                     return 0;
                                 }
+                            }).catch((err: any) => {
+                                console.log(`문제가 생김! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k} `, err);
                             })
                             promiseArray.push(searchPromise);
                         }
@@ -171,10 +185,14 @@ class AccessaryController {
                 })
             }
         }
+        console.log('기다린다.. promise 모든 게 끝나길');
         Promise.all(promiseArray)
         .then((res: any) => {
             console.log('send the response')
             response.send('done');
+        }).catch((res: any) => {
+            console.log('send the response with error')
+            response.send('error');
         })
     }
 
@@ -232,88 +250,93 @@ class AccessaryController {
         })
         Promise.all(casesResult).then((res : any[]) => {
             console.log('getAllCases', res.length);
+            response.send(res);
             // console.log('cases', res);
-            let finalResult: any[] = [];
-            let maxPrice = requestBody.maxPrice;
-            let props = requestBody.props;
-            let penalty = requestBody.penalty;
-            let stop = false;
+            // TODO Temp 주석
+            // let finalResult: any[] = [];
+            // let maxPrice = requestBody.maxPrice;
+            // let props = requestBody.props;
+            // let penalty = requestBody.penalty;
+            // let stop = false;
 
-            res.forEach((cases: any[], caseCount: number) => {
-                if(stop === true) {
-                    return;
-                }
-                cases.forEach((oneCase: any, oneCaseCount: number) => {
-                    if(stop === true) {
-                        return;
-                    }
-                    // console.log('accList', oneCase.accSocketList);
-                    // console.log('accList', oneCase.accList);
-                    let result = getFinalComposition(maxPrice, props, penalty, oneCase.accList);
-                    if(typeof(result) === 'number') {
-                        console.log('getFinalComposition stop', `${caseCount}-${oneCaseCount}`, result);
-                        stop = true;
-                    }else {
-                        // console.log('getFinalComposition', `${caseCount}-${oneCaseCount}`, result.length);
-                        finalResult.push(...result);
-                        if(finalResult.length > 3000) {
-                            stop = true;
-                        }
-                    }
-                })
-            })
-            console.log('finalResult', finalResult.length);
+            // res.forEach((cases: any[], caseCount: number) => {
+            //     if(stop === true) {
+            //         return;
+            //     }
+            //     cases.forEach((oneCase: any, oneCaseCount: number) => {
+            //         if(stop === true) {
+            //             return;
+            //         }
+            //         // console.log('accList', oneCase.accSocketList);
+            //         // console.log('accList', oneCase.accList);
+            //         let result = getFinalComposition(maxPrice, props, penalty, oneCase.accList);
+            //         if(typeof(result) === 'number') {
+            //             console.log('getFinalComposition stop', `${caseCount}-${oneCaseCount}`, result);
+            //             stop = true;
+            //         }else {
+            //             // console.log('getFinalComposition', `${caseCount}-${oneCaseCount}`, result.length);
+            //             finalResult.push(...result);
+            //             if(finalResult.length > 3000) {
+            //                 stop = true;
+            //             }
+            //         }
+            //     })
+            // })
+            // console.log('finalResult', finalResult.length);
     
-            if(finalResult.length > 3000) {
-                response.send({count: -finalResult.length});
-            }
-            else {
-                // 가격순으로 정렬
-                finalResult.sort((a: any, b:any) => {
-                    return a[1].price > b[1].price ? 1 : -1;
-                })
+            // if(finalResult.length > 3000) {
+            //     response.send({count: -finalResult.length});
+            //     return;
+            // }
+            // else {
+            //     // 가격순으로 정렬
+            //     finalResult.sort((a: any, b:any) => {
+            //         return a[1].price > b[1].price ? 1 : -1;
+            //     })
                 
-                if(finalResult[0]) {
-                    // 조합 결과 로그 남기기
-                    let scheme: any = {
-                        grade: grade,
-                        socket: socketList,
-                        property: [],
-                        price: finalResult[0][1].price,
-                    }
-                    if(requestBody.props['[치명]']){
-                        let prop: any = {
-                            id: 0,
-                            name: '치명',
-                            number: requestBody.props['[치명]'],
-                        }
-                        scheme.property.push(prop);
-                    }
-                    if(requestBody.props['[특화]']){
-                        let prop: any = {
-                            id: 1,
-                            name: '특화',
-                            number: requestBody.props['[특화]'],
-                        }
-                        scheme.property.push(prop);
-                    }
-                    if(requestBody.props['[신속]']){
-                        let prop: any = {
-                            id: 2,
-                            name: '신속',
-                            number: requestBody.props['[신속]'],
-                        }
-                        scheme.property.push(prop);
-                    }
-                    let logAcc = new db.logAccComposition(scheme);
-                    logAcc.save();
-                }
-                response.send(finalResult);
+            //     if(finalResult[0]) {
+            //         // 조합 결과 로그 남기기
+            //         let scheme: any = {
+            //             grade: grade,
+            //             socket: socketList,
+            //             property: [],
+            //             price: finalResult[0][1].price,
+            //         }
+            //         if(requestBody.props['[치명]']){
+            //             let prop: any = {
+            //                 id: 0,
+            //                 name: '치명',
+            //                 number: requestBody.props['[치명]'],
+            //             }
+            //             scheme.property.push(prop);
+            //         }
+            //         if(requestBody.props['[특화]']){
+            //             let prop: any = {
+            //                 id: 1,
+            //                 name: '특화',
+            //                 number: requestBody.props['[특화]'],
+            //             }
+            //             scheme.property.push(prop);
+            //         }
+            //         if(requestBody.props['[신속]']){
+            //             let prop: any = {
+            //                 id: 2,
+            //                 name: '신속',
+            //                 number: requestBody.props['[신속]'],
+            //             }
+            //             scheme.property.push(prop);
+            //         }
+            //         let logAcc = new db.logAccComposition(scheme);
+            //         logAcc.save();
+            //     }
+            //     response.send(finalResult);
+            //     return;
 
-            }
+            // }
         }).catch((e) => {
             console.log('뭐가 잘못됐나..?', e);
             response.send([]);
+            return;
         })
     }
 
@@ -375,7 +398,7 @@ class AccessaryController {
             'socket2.id': secondSocket.id,
             'socket2.number': secondSocket.number, 
             timestamp: {
-                $gte: today.clone().add(-2, 'minute').toDate(),
+                $gte: today.clone().add(-10, 'minute').toDate(),
                 $lte: moment().toDate()
             }
         })
