@@ -129,7 +129,7 @@ class AccessaryController {
                                 requestBody.grade)
                             .then((result: any) => {
                                 if(!result) {
-                                    console.log(`디비에 데이터가 없다 ㅠ ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
+                                    // console.log(`디비에 데이터가 없다 ㅠ ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
                                     // 결과가 없음, 데이터를 새로 가져오자
                                     if(requestBody.grade === 4) {
                                         return getDataLegend(param).then((res : any) => {
@@ -145,9 +145,9 @@ class AccessaryController {
                                                 Number(accType),
                                                 requestBody.grade, 
                                                 itemList).then((dbres: any) => {
-                                                    console.log(`디비 저장 성공! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
+                                                    // console.log(`디비 저장 성공! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}, ${itemList.length}개`);
                                                 }).catch((dberr: any) => {
-                                                    console.log(`디비 저장 에러! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`, dberr);
+                                                    console.log(`디비 저장 에러! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}, ${itemList.length}개`, dberr);
                                                 })
                                         });
                                     } else if(requestBody.grade === 5) {
@@ -164,16 +164,16 @@ class AccessaryController {
                                                 Number(accType),
                                                 requestBody.grade, 
                                                 itemList).then((dbres: any) => {
-                                                    console.log(`디비 저장 성공! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
+                                                    // console.log(`디비 저장 성공! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}, ${itemList.length}개`);
                                                 }).catch((dberr: any) => {
-                                                    console.log(`디비 저장 에러! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`, dberr);
+                                                    console.log(`디비 저장 에러! ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}, ${itemList.length}개`, dberr);
                                                 })
                                         });
                                     }
                                     return 0;
                                 } else {
                                     // 최근 데이터가 있으니까 아무것도 안한다.
-                                    console.log(`최근 데이터가 있습니다 ^.^v ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
+                                    // console.log(`최근 데이터가 있습니다 ^.^v ${socket1.name}(${valcomp[0]}) - ${socket2.name}(${valcomp[1]}) 치특신: ${k}`);
                                     return 0;
                                 }
                             }).catch((err: any) => {
@@ -188,10 +188,10 @@ class AccessaryController {
         console.log('기다린다.. promise 모든 게 끝나길');
         Promise.all(promiseArray)
         .then((res: any) => {
-            console.log('send the response')
+            console.log('데이터를 긁어오고 응답을 보냅니다!')
             response.send('done');
         }).catch((res: any) => {
-            console.log('send the response with error')
+            console.log('데이터를 긁어오다가 잘못되었고, 응답을 보냅니다!')
             response.send('error');
         })
     }
@@ -398,7 +398,7 @@ class AccessaryController {
             'socket2.id': secondSocket.id,
             'socket2.number': secondSocket.number, 
             timestamp: {
-                $gte: today.clone().add(-10, 'minute').toDate(),
+                $gte: today.clone().add(-1, 'minute').toDate(),
                 $lte: moment().toDate()
             }
         })
