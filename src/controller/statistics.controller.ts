@@ -1,5 +1,6 @@
 import * as express from 'express';
 import moment from 'moment';
+import { Socket } from '../constants/SocketList';
 
 import db from '../repo/index';
 
@@ -14,6 +15,7 @@ class LogController {
 
     initializeRoutes() {
         this.router.get(`${this.path}`, this.getLogCount);
+        this.router.put(`${this.path}`, this.putLogCount);
         this.router.get(`${this.path}/price`, this.getLogPrice);
         this.router.put(`${this.path}/price`, this.putLogPrice);
     }
@@ -36,6 +38,34 @@ class LogController {
             response.send(res);
         })
     }
+    putLogCount = (request: express.Request, response: express.Response) => {
+        console.log('putLogCount start');
+        let body = request.body;
+        console.log(body);
+
+        checkExistCount(body.grade, body.socketList).then((res: any) => {
+            if(!res) {
+                // 없으면 새로 만들기
+                saveCount(body.grade, body.socketList, body.needNumber);
+            } else {
+                // 있으면 카운트 증가
+                updateCount(res);
+            }
+        })
+
+
+        let scheme: any = {
+            grade: body.grade,
+            socket: body.socket,
+            property: body.property,
+            price: body.price,
+        }
+        console.log('log!', scheme);
+        let logAcc = new db.logAccComposition(scheme);
+        logAcc.save().then((res: any) => {
+            response.send('saved');
+        });
+    }
     putLogPrice = (request: express.Request, response: express.Response) => {
         console.log('putLogPrice start');
         let body = request.body;
@@ -51,6 +81,46 @@ class LogController {
             response.send('saved');
         });
     }
+}
+
+
+function checkExistCount(grade: number, socket: Socket[]) {
+    let select = {
+        grade: grade,
+        $and: socket.map((val: Socket) => {
+            return { socket: { $elemMatch: {id: val.id} } };
+        })
+    }
+    // console.log('checkExistCount', select);
+    return db.logSocket.findOne(select).then((res: any) => {
+        console.log(res);
+        return res;
+    });
+}
+/**
+ * * 새로 로그를 만든다.
+ */
+function saveCount(grade: number, socket: Socket[], needNumber: number[]) {
+    // 각인 목록을 로그에 저장
+    let logSocket = new db.logSocket({
+        grade: grade,
+        socket: socket.map((val: Socket, index: number) => 
+            {return {...val, number: needNumber[index]}}),
+        count: 1,
+    })
+    logSocket.save().then((res: any) => {
+        console.log('로그 카운트 생성!');
+    })
+}
+/**
+ * * 로그의 숫자를 업데이트 한다.
+ */
+ function updateCount(res: any) {
+    res.updateOne({
+        count: res.count + 1,
+    }).then(() => {
+        console.log('로그 카운트 업!');
+    })
 }
 
 export default LogController;
