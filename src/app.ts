@@ -22,7 +22,7 @@ class App {
       credentials: true, // 응답 헤더에 Access-Control-Allow-Credentials 추가
       optionsSuccessStatus: 200 // 응답 상태 200으로 설정 
     };
-    this.app.use(cors(CORSoptions));
+    this.app.use(cors());
   }
 
   private initializeNoSQL() {
