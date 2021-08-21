@@ -46,40 +46,38 @@ class LogController {
         checkExistCount(body.grade, body.socketList).then((res: any) => {
             if(!res) {
                 // 없으면 새로 만들기
+                console.log('save new count log');
                 saveCount(body.grade, body.socketList, body.needNumber);
+                response.send({count: 1});
             } else {
                 // 있으면 카운트 증가
+                console.log('save exist count log');
                 updateCount(res);
+                response.send({count: res.count});
             }
         })
+        .catch((err: any) => {
+            response.send('error');
+        })
 
-
-        let scheme: any = {
-            grade: body.grade,
-            socket: body.socket,
-            property: body.property,
-            price: body.price,
-        }
-        console.log('log!', scheme);
-        let logAcc = new db.logAccComposition(scheme);
-        logAcc.save().then((res: any) => {
-            response.send('saved');
-        });
     }
     putLogPrice = (request: express.Request, response: express.Response) => {
         console.log('putLogPrice start');
         let body = request.body;
         let scheme: any = {
             grade: body.grade,
-            socket: body.socket,
+            socket: body.socketList,
             property: body.property,
             price: body.price,
         }
-        console.log('log!', scheme);
+        console.log('save price log into db!', scheme);
         let logAcc = new db.logAccComposition(scheme);
         logAcc.save().then((res: any) => {
-            response.send('saved');
-        });
+            response.send({price: res.price});
+        })
+        .catch((err: any) => {
+            response.send('error');
+        })
     }
 }
 
@@ -108,9 +106,14 @@ function saveCount(grade: number, socket: Socket[], needNumber: number[]) {
             {return {...val, number: needNumber[index]}}),
         count: 1,
     })
-    logSocket.save().then((res: any) => {
+    logSocket.save()
+    .then((res: any) => {
         console.log('로그 카운트 생성!');
+        return res;
     })
+    .catch((err: any) => {
+        return err;
+    }) 
 }
 /**
  * * 로그의 숫자를 업데이트 한다.
@@ -118,8 +121,13 @@ function saveCount(grade: number, socket: Socket[], needNumber: number[]) {
  function updateCount(res: any) {
     res.updateOne({
         count: res.count + 1,
-    }).then(() => {
+    })
+    .then(() => {
         console.log('로그 카운트 업!');
+        return res;
+    })
+    .catch((err: any) => {
+        return err;
     })
 }
 
